@@ -17,7 +17,8 @@ O link de pedidos é uma página só sua, onde o cliente informa onde está e pe
 ## O que o cliente preenche (3 passos)
 
 - Onde o veículo está. Ele pode tocar em **Usar minha localização** para enviar o ponto do celular, ou escrever o endereço.
-- Para onde levar, o tipo de serviço, nome, WhatsApp e veículo.
+- Para onde levar, o tipo de serviço, veículo, nome e WhatsApp.
+- Uma foto do veículo, se quiser. Ela aparece para você ao abrir o chamado, com a etiqueta **Com foto** no cartão.
 
 O cliente não vê preço. Quem cota é você, com a sua tabela, antes de despachar.
 

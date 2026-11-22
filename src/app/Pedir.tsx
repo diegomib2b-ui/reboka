@@ -10,6 +10,23 @@ const DEMO: PedirInfo = { nome: 'Guincho Pinheirinho 24h', telefone: '4199999000
 
 type Posicao = { lat: number; lng: number; precisao: number };
 
+// Reduz a foto no próprio celular antes de enviar: lado maior de 1280 px em JPEG. Uma foto de 4 MB vira cerca de 200 KB,
+// o que economiza o plano de dados do cliente e o armazenamento.
+async function reduzir(arquivo: File): Promise<Blob> {
+  const img = await createImageBitmap(arquivo);
+  let lado = 1280, q = 0.72, saida: Blob | null = null;
+  for (let i = 0; i < 4; i++) {
+    const f = Math.min(1, lado / Math.max(img.width, img.height));
+    const c = document.createElement('canvas'); c.width = Math.round(img.width * f); c.height = Math.round(img.height * f);
+    c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+    saida = await new Promise<Blob | null>((ok) => c.toBlob(ok, 'image/jpeg', q));
+    if (saida && saida.size <= 560 * 1024) break;   // o limite do servidor é 600 KB
+    lado = Math.round(lado * 0.75); q -= 0.08;
+  }
+  if (!saida) throw new Error('foto');
+  return saida;
+}
+
 export default function Pedir() {
   const slug = new URLSearchParams(location.search).get('g') ?? '';
   const demo = slug === 'demo';
@@ -30,6 +47,9 @@ export default function Pedir() {
   const [pronto, setPronto] = useState(false);
   const [erro, setErro] = useState('');
   const [passo, setPasso] = useState(0);
+  const [foto, setFoto] = useState<{ blob: Blob; url: string } | null>(null);
+  const [erroFoto, setErroFoto] = useState('');
+  const [fotoFalhou, setFotoFalhou] = useState(false);
 
   useEffect(() => {
     if (demo) { setInfo(DEMO); setCarregando(false); return; }
@@ -39,6 +59,17 @@ export default function Pedir() {
 
   // O aviso de erro some assim que a pessoa corrige o campo.
   useEffect(() => { setErro(''); }, [pos, origem, nome, telefone]);
+
+  async function escolherFoto(arquivo: File | undefined) {
+    if (!arquivo) return;
+    setErroFoto('');
+    try {
+      const blob = await reduzir(arquivo);
+      if (foto) URL.revokeObjectURL(foto.url);
+      setFoto({ blob, url: URL.createObjectURL(blob) });
+    } catch { setErroFoto('Não consegui usar essa foto. Tente outra ou siga sem foto.'); }
+  }
+  function tirarFoto() { if (foto) URL.revokeObjectURL(foto.url); setFoto(null); }
 
   function localizar() {
     if (!navigator.geolocation) { setErroPos('Este celular não liberou a localização. Escreva o endereço abaixo.'); return; }
@@ -68,7 +99,11 @@ export default function Pedir() {
     if (passo < PASSOS.length - 1) { ir(passo + 1); return; }
     setEnviando(true); setErro('');
     try {
-      if (!demo) await api.pedir(slug, { nome, telefone, veiculo, placa, servico, origem, destino, observacao: obs, lat: pos?.lat ?? null, lng: pos?.lng ?? null });
+      if (!demo) {
+        const id = await api.pedir(slug, { nome, telefone, veiculo, placa, servico, origem, destino, observacao: obs, lat: pos?.lat ?? null, lng: pos?.lng ?? null });
+        // O pedido já está gravado. Se a foto falhar (sinal fraco), o cliente é avisado e o guincho recebe o pedido do mesmo jeito.
+        if (foto) { try { await api.enviarFotoPedido(id, foto.blob); } catch { setFotoFalhou(true); } }
+      }
       setPronto(true);
     } catch (e) { setErro((e as Error).message); setEnviando(false); }
   }
@@ -80,6 +115,7 @@ export default function Pedir() {
       <div className="ag-check">✓</div>
       <h1>Pedido enviado!</h1>
       <p><b>{info.nome}</b> recebeu seu pedido e vai responder no seu WhatsApp com o valor e o tempo de chegada.</p>
+      {fotoFalhou && <p className="ag-erro">O pedido foi enviado, mas a foto não. Se puder, mande a foto pelo WhatsApp do guincho.</p>}
       <p className="ag-sub">Fique em local seguro e com o pisca-alerta ligado.</p>
       {info.telefone && <a className="ag-confirmar pd-wpp" href={linkWhatsApp(info.telefone, `Oi! Acabei de pedir um guincho pelo link. Meu nome é ${nome.trim()}.`)} target="_blank" rel="noopener">Falar com o guincho no WhatsApp</a>}
       {demo && <p className="ag-sub">Este é um exemplo: nada foi gravado.</p>}
@@ -133,6 +169,22 @@ export default function Pedir() {
               </div>
               <label className="ag-campo"><span>Observação (opcional)</span><input value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Roda travada, sem chave, carro rebaixado" maxLength={300} /></label>
             </div>
+            <div className="ag-bloco">
+              <h2>Foto do veículo (opcional)</h2>
+              {foto ? (
+                <div className="pd-foto">
+                  <img src={foto.url} alt="Foto do veículo que será enviada" />
+                  <div>
+                    <label className="pd-foto-acao">Trocar foto<input type="file" accept="image/*" capture="environment" onChange={(e) => escolherFoto(e.target.files?.[0])} /></label>
+                    <button type="button" className="pd-foto-acao" onClick={tirarFoto}>Remover</button>
+                  </div>
+                </div>
+              ) : (
+                <label className="pd-foto-botao">Tirar foto do veículo<input type="file" accept="image/*" capture="environment" onChange={(e) => escolherFoto(e.target.files?.[0])} /></label>
+              )}
+              <p className="pd-nota pd-foto-nota">Ajuda o guincho a levar o equipamento certo. Mostre o veículo inteiro, se der.</p>
+              {erroFoto && <p className="ag-erro">{erroFoto}</p>}
+            </div>
           </section>
         )}
 
@@ -147,7 +199,7 @@ export default function Pedir() {
             <dl className="pd-resumo">
               <dt>Onde está</dt><dd>{[pos ? 'Localização do celular' : '', origem.trim()].filter(Boolean).join(' · ')}<button type="button" onClick={() => ir(0)}>Alterar</button></dd>
               {destino.trim() && <><dt>Para onde</dt><dd>{destino.trim()}</dd></>}
-              <dt>Pedido</dt><dd>{[servico, veiculo.trim(), placa.trim().toUpperCase()].filter(Boolean).join(' · ') || 'Não informado'}<button type="button" onClick={() => ir(1)}>Alterar</button></dd>
+              <dt>Pedido</dt><dd>{[servico, veiculo.trim(), placa.trim().toUpperCase(), foto ? 'com foto' : ''].filter(Boolean).join(' · ') || 'Não informado'}<button type="button" onClick={() => ir(1)}>Alterar</button></dd>
             </dl>
           </section>
         )}

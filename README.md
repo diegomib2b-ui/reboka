@@ -45,7 +45,7 @@ Sem API de mapas: a pessoa digita o km e um link abre a rota no Google Maps para
 | Landing | `src/pages/index.astro` |
 | Tela de chamados | `src/app/Chamados.tsx` |
 | Dados da demonstração | `src/app/demo.ts` |
-| Banco | `supabase/migrations/` (a 0024 é a do guincho e a 0025 a do link de pedidos) |
+| Banco | `supabase/migrations/` (0024: guincho; 0025: link de pedidos; 0026: foto do pedido, no Storage) |
 
 ## Regras do projeto
 

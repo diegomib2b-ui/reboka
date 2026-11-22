@@ -46,6 +46,12 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
   const [pix, setPix] = useState<Agendamento | null>(null);
   const [tarifas, setTarifas] = useState(false);
   const [linkAberto, setLinkAberto] = useState(false);
+  const [fotoUrl, setFotoUrl] = useState<string | null>(null);
+  // Ao abrir um chamado com foto, pede ao servidor um endereço temporário da imagem.
+  useEffect(() => {
+    setFotoUrl(null);
+    if (sel?.tem_foto) api.fotoChamado(sel.id).then(setFotoUrl).catch(() => {});
+  }, [sel?.id]);
   const [, setTique] = useState(0);
 
   const carregar = () => api.agendamentos().then(setLista).catch((e) => setErro(e.message));
@@ -115,6 +121,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
         <footer>
           <span className="ch-tags">
             {a.canal === 'link' && <span className="chip chip-ok">Pelo link</span>}
+            {a.tem_foto && <span className="chip chip-neutro">Com foto</span>}
             {a.motorista && <span className="chip chip-neutro">{a.motorista}</span>}
             {a.pagador && <span className="chip chip-neutro">Paga: {a.pagador}</span>}
           </span>
@@ -205,6 +212,12 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
               <div className="det-lin"><span className="det-val"><b>{sel.nome}</b>{sel.telefone ? ` · ${telefoneBR(sel.telefone)}` : ''}</span></div>
               <div className="det-lin"><span className="det-val">{[sel.veiculo, sel.placa].filter(Boolean).join(' · ') || 'Veículo não informado'}</span></div>
             </div>
+            {sel.tem_foto && (
+              <div className="det-sec">
+                <span className="det-rot">Foto enviada pelo cliente</span>
+                {fotoUrl ? <a href={fotoUrl} target="_blank" rel="noopener" className="ch-foto"><img src={fotoUrl} alt={`Foto do veículo de ${sel.nome}`} /></a> : <p className="dica sem-topo">Carregando a foto…</p>}
+              </div>
+            )}
             <div className="det-sec">
               <span className="det-rot">Trajeto</span>
               <ol className="ch-rota">

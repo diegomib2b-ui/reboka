@@ -69,3 +69,11 @@ body { background: var(--moldura); }
 .pd-resumo dt:first-child { margin-top: 0; }
 .pd-resumo dd { margin: 0; color: var(--tinta); display: flex; justify-content: space-between; gap: 12px; align-items: baseline; overflow-wrap: anywhere; }
 .pd-resumo dd button { flex: 0 0 auto; background: none; border: 0; padding: 0; font: 600 .86rem var(--fonte-texto); color: var(--marca-escura); text-decoration: underline; cursor: pointer; }
+.pd-foto-botao, .pd-foto-acao { position: relative; overflow: hidden; display: block; text-align: center; cursor: pointer; font: 600 1rem var(--fonte-texto); color: var(--grafite); background: #fff; border: 1.5px dashed var(--grafite); padding: 15px; }
+.pd-foto-botao input, .pd-foto-acao input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.pd-foto-botao:focus-within, .pd-foto-acao:focus-within { outline: 3px solid var(--marca); outline-offset: 1px; }
+.pd-foto { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: stretch; }
+.pd-foto img { width: 120px; height: 120px; object-fit: cover; border: 1.5px solid var(--borda); display: block; }
+.pd-foto > div { display: grid; gap: 8px; align-content: center; }
+.pd-foto-acao { border-style: solid; border-color: var(--borda); padding: 11px; font-size: .92rem; }
+.pd-foto-nota { margin: 10px 0 0; }

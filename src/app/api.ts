@@ -103,7 +103,7 @@ export type Agendamento = {
   origem: string | null; destino: string | null; km: number | null; valor: number | null; noturno: boolean;
   adicionais: Adicional[]; motorista: string | null; placa: string | null; pagador: string | null; pago: boolean; observacao: string | null;
   /** 'link' quando o cliente pediu pelo link público; com a posição do celular, se ele enviou. */
-  canal?: string | null; origem_lat?: number | null; origem_lng?: number | null;
+  canal?: string | null; origem_lat?: number | null; origem_lng?: number | null; tem_foto?: boolean;
 };
 export type PedirInfo = { nome: string; telefone: string | null; servicos: string[] };
 export type Pedido = { nome: string; telefone: string; veiculo: string; placa: string; servico: string; origem: string; destino: string; observacao: string; lat: number | null; lng: number | null };
@@ -551,6 +551,17 @@ export const api = {
   async pedir(slug: string, d: Pedido) {
     return ok(await sb.rpc('reboka_pedir', { p_slug: slug, p_nome: d.nome, p_telefone: d.telefone, p_veiculo: d.veiculo, p_placa: d.placa, p_servico: d.servico,
       p_origem: d.origem, p_destino: d.destino, p_observacao: d.observacao, p_lat: d.lat, p_lng: d.lng })) as string;
+  },
+  /** Envia a foto do veículo de um pedido recém-criado (arquivo <id>.jpg no Storage) e marca o chamado. */
+  async enviarFotoPedido(id: string, foto: Blob) {
+    const r = await sb.storage.from('reboka-pedidos').upload(`${id}.jpg`, foto, { contentType: 'image/jpeg', upsert: false });
+    if (r.error) throw new Error('Não foi possível enviar a foto.');
+    ok(await sb.rpc('reboka_pedir_foto', { p_id: id }));
+  },
+  /** Endereço temporário (10 minutos) da foto do chamado. Só a equipe do guincho consegue gerar. */
+  async fotoChamado(id: string): Promise<string | null> {
+    const r = await sb.storage.from('reboka-pedidos').createSignedUrl(`${id}.jpg`, 600);
+    return r.data?.signedUrl ?? null;
   },
   async salvarPedirConfig(lojaId: string, d: { pedir_ativo?: boolean; pedir_telefone?: string | null; slug?: string }) {
     const r = await sb.from('reboka_lojas').update(d).eq('id', lojaId).select('id');
