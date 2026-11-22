@@ -183,6 +183,33 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
     </>
   );
 
+  /** Trilha do transporte, como o rastreio de entrega: indo buscar → levando → entregue, com o guincho andando na barra. */
+  function trilha(a: Agendamento, compacta = false) {
+    const f = faseDe(a.status);
+    if (f !== 'em_servico' && f !== 'pronto') return null;
+    const etapa = f === 'em_servico' ? 0 : 1;
+    const pct = etapa === 0 ? 30 : 66;
+    const para = curto(a.destino);
+    const texto = etapa === 0
+      ? `${a.motorista ? `${a.motorista} indo buscar` : 'Indo buscar'}${curto(a.origem) && !/^Localização/.test(a.origem ?? '') ? ` em ${curto(a.origem)}` : ''}`
+      : `${a.motorista ? `${a.motorista} levando` : 'Levando'}${para ? ` para ${para}` : ''}`;
+    const ETAPAS = ['Indo buscar', 'Levando', 'Entregue'];
+    return (
+      <div className={`ch-trilha${compacta ? ' ch-trilha-mini' : ''}`} aria-label={`Andamento: ${texto}`}>
+        {!compacta && <span className="ch-trilha-texto">{texto}</span>}
+        <div className="ch-trilha-barra" aria-hidden="true">
+          <i style={{ width: `${pct}%` }} />
+          <span className="ch-trilha-guincho" style={{ left: `${pct}%` }}><Icone nome="guincho" tamanho={compacta ? 18 : 22} /></span>
+        </div>
+        {compacta ? <span className="ch-trilha-texto">{texto}</span> : (
+          <ol className="ch-trilha-etapas">
+            {ETAPAS.map((e, i) => <li key={e} className={i < etapa ? 'feito' : i === etapa ? 'atual' : ''}>{e}</li>)}
+          </ol>
+        )}
+      </div>
+    );
+  }
+
   function agora(a: Agendamento) {
     const p = passo(a); const m = Math.max(0, minutosDesde(a.inicio)); const f = faseDe(a.status);
     return (
@@ -194,6 +221,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
         <h2>{a.nome}</h2>
         <p>{resumo(a)}{a.servico_nome ? ` · ${a.servico_nome}` : ''}</p>
         <div className="ch-tags">{etiquetas(a)}</div>
+        {trilha(a)}
         <footer>
           <div className="ch-agora-valor"><small>{a.valor ? 'Valor' : 'Sem cotação'}</small><b>{a.valor ? brl(a.valor) : 'A cotar'}</b></div>
           {p.botao && <button type="button" className="btn btn-primario" onClick={(e) => { e.stopPropagation(); p.fazer(); }}>{p.botao}</button>}
@@ -207,7 +235,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
     return (
       <article key={a.id} className={`ch-linha ch-e-${estado(a).replace(' ', '-')}${atrasado(a) ? ' atrasado' : ''}${alvo?.id === a.id && largo ? ' sel' : ''}`} role="button" tabIndex={0} onClick={() => abrir(a)} onKeyDown={(e) => e.key === 'Enter' && abrir(a)}>
         <div className="ch-quando"><b>{tempo(a)}</b><small>{estado(a)}</small></div>
-        <div className="ch-quem"><h3>{a.nome}</h3><p>{resumo(a)}</p></div>
+        <div className="ch-quem"><h3>{a.nome}</h3>{trilha(a, true) ?? <p>{resumo(a)}</p>}</div>
         <div className="ch-fazer">
           <b>{a.valor ? brl(a.valor) : 'A cotar'}</b>
           {p.botao
