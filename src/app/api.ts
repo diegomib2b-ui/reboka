@@ -103,7 +103,7 @@ export type Agendamento = {
   origem: string | null; destino: string | null; km: number | null; valor: number | null; noturno: boolean;
   adicionais: Adicional[]; motorista: string | null; placa: string | null; pagador: string | null; pago: boolean; observacao: string | null;
   /** 'link' quando o cliente pediu pelo link público; com a posição do celular, se ele enviou. */
-  canal?: string | null; origem_lat?: number | null; origem_lng?: number | null; tem_foto?: boolean;
+  canal?: string | null; origem_lat?: number | null; origem_lng?: number | null; tem_foto?: boolean; cotacao_enviada_em?: string | null;
 };
 export type PedirInfo = { nome: string; telefone: string | null; servicos: string[] };
 export type Pedido = { nome: string; telefone: string; veiculo: string; placa: string; servico: string; origem: string; destino: string; observacao: string; lat: number | null; lng: number | null };
@@ -519,7 +519,7 @@ export const api = {
   async criarChamado(lojaId: string, d: NovoChamado) {
     return ok(await sb.from('reboka_agendamentos').insert({ loja_id: lojaId, ...d, telefone: d.telefone ? d.telefone.replace(/\D/g, '') : null }).select('id'));
   },
-  async atualizarChamado(id: string, d: Partial<Pick<Agendamento, 'motorista' | 'valor' | 'km' | 'pago' | 'pagador' | 'observacao' | 'destino' | 'origem'>>) {
+  async atualizarChamado(id: string, d: Partial<Pick<Agendamento, 'motorista' | 'valor' | 'km' | 'pago' | 'pagador' | 'observacao' | 'destino' | 'origem' | 'noturno' | 'adicionais' | 'cotacao_enviada_em'>>) {
     ok(await sb.from('reboka_agendamentos').update(d).eq('id', id).select('id'));
   },
   /** Entregar o chamado: marca entregue e lança o valor cobrado no financeiro (acha ou cria o cliente pelo telefone). */

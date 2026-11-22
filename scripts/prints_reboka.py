@@ -28,8 +28,8 @@ async def main():
                 await pg.fill("input[placeholder='14']", "18"); await pg.click(".ch-adic button >> nth=0"); await pg.wait_for_timeout(300)
                 await pg.screenshot(path=f"docs/prints/novo-chamado-{tela}.png")
                 await pg.click(".ch-cot .btn-primario"); await pg.wait_for_timeout(600)
-                await pg.click(".ch-col.on .ch-card .btn-primario, .ch-col-fila .ch-card .btn-primario"); await pg.wait_for_timeout(400)
-                await pg.screenshot(path=f"docs/prints/despachar-{tela}.png")
+                await pg.click(".ch-agora footer .btn"); await pg.wait_for_timeout(400)   # o primeiro da fila pede cotação
+                await pg.screenshot(path=f"docs/prints/cotar-{tela}.png")
                 print(tela, erros)
                 await pg.close()
             await b.close()

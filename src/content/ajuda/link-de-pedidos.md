@@ -5,7 +5,7 @@ categoria: Chamados
 ordem: 2
 ---
 
-O link de pedidos é uma página só sua, onde o cliente informa onde está e pede o guincho. O pedido cai na coluna **Novos** dos seus chamados.
+O link de pedidos é uma página só sua, onde o cliente informa onde está e pede o guincho. O pedido cai no topo da sua fila de chamados.
 
 ## Como ligar
 
@@ -24,7 +24,7 @@ O cliente não vê preço. Quem cota é você, com a sua tabela, antes de despac
 
 ## Quando o pedido chega
 
-O chamado aparece em **Novos** com a etiqueta **Pelo link**. Abra o chamado para ver o ponto no mapa, informe a distância, envie a cotação pelo WhatsApp e despache.
+O chamado aparece na fila com a etiqueta **Pelo link** e o botão **Cotar**. Toque nele, confira a distância no mapa, informe os quilômetros e toque em **Salvar e enviar cotação**. Depois é só despachar.
 
 A tela busca pedidos novos a cada minuto. Deixe o painel aberto no celular durante o atendimento.
 

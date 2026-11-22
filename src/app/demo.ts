@@ -108,8 +108,8 @@ const ch = (id: string, nome: string, telefone: string, veiculo: string, placa: 
   id, nome, telefone, veiculo, placa, servico_nome, origem, destino, km, valor, status, inicio, criado_em: inicio, previsao_entrega: null, vaga: null,
   noturno: false, adicionais: [], motorista: null, pagador: null, pago: false, observacao: null, ...x });
 const agendamentos: Agendamento[] = [
-  ch('a1', 'Thaís Guedes', '41990000020', 'Onix branco', 'RTY7A21', 'Reboque de carro', 'Av. das Torres, 1200, Uberaba', 'Auto Center Silva, Boqueirão', 14, 213, 'fila', min(4)),
-  ch('a2', 'Rafael Cordeiro', '41990000021', 'CG 160 vermelha', null, 'Reboque de moto', 'R. Izaac Ferreira da Cruz, Sítio Cercado', 'Residência, Xaxim', 6, 177, 'fila', min(11), { observacao: 'Pneu traseiro furado', canal: 'link', origem_lat: -25.5402, origem_lng: -49.2655, tem_foto: true }),
+  ch('a1', 'Thaís Guedes', '41990000020', 'Onix branco', 'RTY7A21', 'Reboque de carro', 'Av. das Torres, 1200, Uberaba', 'Auto Center Silva, Boqueirão', 14, 213, 'fila', min(4), { cotacao_enviada_em: min(2) }),
+  ch('a2', 'Rafael Cordeiro', '41990000021', 'CG 160 vermelha', null, 'Reboque de moto', 'R. Izaac Ferreira da Cruz, Sítio Cercado', 'Residência, Xaxim', 0, 0, 'fila', min(11), { observacao: 'Pneu traseiro furado', canal: 'link', origem_lat: -25.5402, origem_lng: -49.2655, tem_foto: true }),
   ch('a3', 'Patrícia Souza', '41990000003', 'Compass branco', 'ABC1D23', 'Reboque de utilitário ou SUV', 'BR-277, km 78, sentido litoral', 'Concessionária Jeep, Rebouças', 31, 370, 'em_servico', min(26), { motorista: 'Arthur', adicionais: [{ nome: 'Patins', valor: 80 }] }),
   ch('a4', 'Oficina do Beto', '41988880001', 'Civic cinza', 'GHI3F67', 'Reboque de carro', 'R. Francisco Derosso, 3400, Xaxim', 'Oficina do Beto, Pinheirinho', 9, 191, 'pronto', min(48), { motorista: 'Madie', pagador: 'Oficina do Beto' }),
   ch('a5', 'Carlos Mendes', '41990000001', 'Hilux prata', 'DEF2E45', 'Socorro: bateria (chupeta)', 'Shopping Palladium, estacionamento G2', 'No local', 5, 120, 'entregue', min(140), { motorista: 'Arthur', pago: true }),

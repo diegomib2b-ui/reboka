@@ -35,6 +35,9 @@ A cotação (`cotar` em `src/app/util.ts`) é: saída + km além da franquia × 
 O socorro (serviço cujo nome começa com "Socorro") usa o preço fechado do serviço. A tabela de preço fica em `reboka_lojas` (`tarifa_*`).
 Sem API de mapas: a pessoa digita o km e um link abre a rota no Google Maps para conferir.
 
+A tela de Chamados é uma fila de prioridade (`prioridade` e `passo` em `src/app/Chamados.tsx`): novo sem resposta, novo já cotado,
+agendado que está chegando, carregado e a caminho. Cada chamado mostra um botão só, o próximo passo.
+
 ## Onde mexer
 
 | O quê | Arquivo |

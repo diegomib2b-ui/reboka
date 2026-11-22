@@ -10,6 +10,7 @@ grant update (tarifa_saida, tarifa_km, tarifa_franquia_km, tarifa_noturno_pct, t
 
 alter table reboka_agendamentos
   add column if not exists canal text,                                -- 'link' quando o pedido veio do link público
+  add column if not exists cotacao_enviada_em timestamptz,           -- quando a cotação foi mandada ao cliente (decide o próximo passo na fila)
   add column if not exists origem_lat numeric(9,6),
   add column if not exists origem_lng numeric(9,6);
 
