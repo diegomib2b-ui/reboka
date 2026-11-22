@@ -1414,3 +1414,46 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
   .faixa a { color: var(--grafite); }
   .demo-selo { top: auto; }
 }
+
+/* === Trajeto do chamado: guincho → veículo → destino → base, com a rota medida pelo mapa === */
+.ch-pt-g { background: var(--grafite); border: 2.5px solid var(--grafite); }
+.ch-pt-base { background: #fff; border: 2.5px solid var(--grafite); border-radius: 0; }
+.tj { display: grid; gap: 0; position: relative; border: 1px solid var(--borda); background: #fff; padding: 12px 14px 10px; }
+.tj-pt { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start; padding: 4px 0 10px; position: relative; }
+.tj-pt:not(.tj-fim)::after { content: ''; position: absolute; left: 5px; top: 19px; bottom: -3px; border-left: 1.5px dashed #C9CCD2; }
+.tj-marca { width: 12px; height: 12px; margin-top: 3px; display: block; position: relative; z-index: 1; border: 2.5px solid var(--grafite); background: #fff; box-sizing: border-box; }
+.tj-m-guincho { background: var(--grafite); border-radius: 50%; }
+.tj-m-a { border-radius: 50%; }
+.tj-m-b { background: var(--marca); }
+.tj-m-base { background: #fff; }
+.tj-corpo { min-width: 0; display: grid; gap: 6px; }
+.tj-corpo .campo { margin: 0; }
+.tj .campo-rotulo, .tj-corpo > .campo-rotulo { font: 700 .72rem var(--fonte-texto); letter-spacing: .08em; text-transform: uppercase; color: var(--cinza); }
+.tj-texto { margin: 0; font-size: .95rem; color: var(--tinta); overflow-wrap: anywhere; }
+.tj-opcoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.tj-opcoes button { border: 1.5px solid var(--borda); background: #fff; padding: 7px 11px; font: 600 .84rem var(--fonte-texto); color: var(--grafite); cursor: pointer; }
+.tj-opcoes button[aria-pressed="true"] { background: var(--grafite); border-color: var(--grafite); color: #fff; }
+.tj-opcoes button:disabled { opacity: .6; cursor: progress; }
+.tj-campo { position: relative; display: grid; gap: 4px; }
+.tj-entrada { position: relative; display: block; }
+.tj-entrada input { padding-right: 40px !important; }
+.tj-ok { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #1F7A4D; display: grid; }
+.tj-sug { list-style: none; margin: 0; padding: 0; border: 1.5px solid var(--grafite); border-top: 0; background: #fff; position: relative; z-index: 5; }
+.tj-sug li + li { border-top: 1px solid var(--borda); }
+.tj-sug button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 10px 12px; font: 500 .92rem var(--fonte-texto); color: var(--tinta); cursor: pointer; }
+.tj-sug button:hover, .tj-sug button:focus-visible { background: var(--nevoa); }
+.tj-sug-info { padding: 10px 12px; font-size: .88rem; color: var(--cinza); }
+.tj-kms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; border-top: 1px solid var(--borda); padding-top: 10px; margin-top: 2px; }
+.tj-km { display: grid; gap: 4px; }
+.tj-km > span:first-child { font: 700 .68rem var(--fonte-texto); letter-spacing: .07em; text-transform: uppercase; color: var(--cinza); }
+.tj-km-campo { display: flex; align-items: center; border: 1.5px solid var(--borda); background: #fff; }
+.tj-km-campo input { width: 100%; min-width: 0; border: 0; height: 42px; padding: 0 0 0 10px; font: 600 1rem var(--fonte-texto); color: var(--tinta); background: none; }
+.tj-km-campo input:focus-visible { outline: none; }
+.tj-km-campo:focus-within { outline: 3px solid var(--marca); outline-offset: 1px; border-color: var(--marca); }
+.tj-km-campo i { font-style: normal; font-size: .82rem; color: var(--cinza); padding: 0 10px 0 4px; }
+.tj-status { margin: 8px 0 0; font-size: .86rem; color: var(--cinza); line-height: 1.35; }
+.tj-erro { color: var(--perigo, #B42318); }
+.ch-form .tj { margin-bottom: 14px; }
+.tj-credito { margin: 4px 0 0; padding: 6px 12px; font-size: .72rem; color: var(--cinza); line-height: 1.35; }
+li.tj-credito { border-top: 1px solid var(--borda); }
+.tj-credito a { color: var(--cinza); }

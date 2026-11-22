@@ -5,6 +5,7 @@
  */
 import { planos, DESCONTO_ANUAL } from '../src/data/site';
 import { waWebhook, waConectar, waStatus, waEnviar, waCronRetornos } from './whatsapp';
+import { buscarEndereco, calcularRota, mapaPronto } from './mapa';
 
 export interface Env {
   ASSETS: { fetch: (r: Request) => Promise<Response> };
@@ -19,6 +20,9 @@ export interface Env {
   EVOLUTION_KEY?: string;
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_MODEL?: string;
+  /** Mapa (rota e endereço): um dos dois. Com os dois, vale o Google. */
+  GOOGLE_MAPS_KEY?: string;
+  ORS_KEY?: string;
 }
 
 type Plano = 'essencial' | 'equipe';
@@ -165,10 +169,18 @@ export default {
     const pronto = Boolean(env.MP_ACCESS_TOKEN && env.SUPABASE_SECRET_KEY);
     try {
       if (pathname === '/api/saude') {
-        return json({ cobranca: pronto, aviso: Boolean(env.MP_WEBHOOK_SECRET), modoTeste: (env.MP_ACCESS_TOKEN ?? '').startsWith('TEST-') });
+        return json({ cobranca: pronto, aviso: Boolean(env.MP_WEBHOOK_SECRET), modoTeste: (env.MP_ACCESS_TOKEN ?? '').startsWith('TEST-'), mapa: mapaPronto(env) ? (env.GOOGLE_MAPS_KEY ? 'google' : 'openrouteservice') : false });
       }
       // WhatsApp com IA: não depende da cobrança (Mercado Pago).
       if (pathname === '/api/wa/webhook') return await waWebhook(req, env);
+      // Mapa: só para quem está logado, para ninguém de fora gastar a cota.
+      if (pathname.startsWith('/api/mapa/')) {
+        const eu = await quemE(req, env);
+        if (!eu) return erro('Entre na sua conta de novo.', 401);
+        if (pathname === '/api/mapa/endereco' && req.method === 'GET') return await buscarEndereco(env, new URL(req.url));
+        if (pathname === '/api/mapa/rota' && req.method === 'POST') return await calcularRota(env, req);
+        return erro('Rota não encontrada.', 404);
+      }
       if (pathname.startsWith('/api/wa/')) {
         const eu = await quemE(req, env);
         if (!eu) return erro('Entre na sua conta de novo.', 401);

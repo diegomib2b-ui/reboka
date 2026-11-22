@@ -17,6 +17,34 @@ const hora = (h: number, m = 0) => { const x = new Date(base); x.setHours(h, m, 
 const diaISO = (n: number) => { const x = new Date(base); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
 const diaHora = (n: number, h = 8) => { const x = new Date(base); x.setDate(x.getDate() + n); x.setHours(h, 0, 0, 0); return x.toISOString(); };
 
+/** Mapa da demonstração: alguns endereços reais de Curitiba; o resto cai num ponto inventado perto do centro. */
+const LUGARES: [string, string, number, number][] = [
+  ['derosso', 'R. Francisco Derosso, 1500 - Xaxim, Curitiba - PR', -25.501, -49.2633],
+  ['winston', 'Av. Winston Churchill, 2500 - Pinheirinho, Curitiba - PR', -25.5135, -49.295],
+  ['torres', 'Av. das Torres, 1200 - Uberaba, Curitiba - PR', -25.46, -49.23],
+  ['auto center', 'Auto Center Silva - Boqueirão, Curitiba - PR', -25.499, -49.238],
+  ['boqueir', 'R. Waldemar Loureiro Campos, 900 - Boqueirão, Curitiba - PR', -25.497, -49.24],
+  ['argentina', 'Av. República Argentina, 3000 - Portão, Curitiba - PR', -25.474, -49.295],
+  ['batel', 'Av. do Batel, 1800 - Batel, Curitiba - PR', -25.443, -49.288],
+  ['izaac', 'R. Izaac Ferreira da Cruz, 3000 - Sítio Cercado, Curitiba - PR', -25.5402, -49.2655],
+  ['palladium', 'Shopping Palladium - Portão, Curitiba - PR', -25.4778, -49.2914],
+  ['ponta grossa', 'Ponta Grossa - PR', -25.0945, -50.1633],
+];
+const semAcento = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function mapaDemo(q: string) {
+  const t = semAcento(q);
+  const achados = LUGARES.filter(([k]) => t.includes(k)).map(([, texto, lat, lng]) => ({ texto, lat, lng }));
+  if (achados.length) return achados;
+  let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const nome = q.trim().replace(/^./, (c) => c.toUpperCase());
+  return [{ texto: `${nome}, Curitiba - PR`, lat: -25.43 + ((h % 1600) - 800) / 10000, lng: -49.27 + (((h >> 11) % 1600) - 800) / 10000 }];
+}
+function distKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const r = (g: number) => (g * Math.PI) / 180, dLat = r(b.lat - a.lat), dLng = r(b.lng - a.lng);
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+}
+
 const loja: Loja = {
   id: 'demo', nome: 'Guincho Pinheirinho 24h', documento: null, plano: 'pro_ia', assinatura: 'ativa',
   teste_termina_em: '2026-12-31', meta_mensal: 20000, periodicidade: 'mensal', mp_assinatura_id: null, acesso_ate: null,
@@ -24,6 +52,7 @@ const loja: Loja = {
   avaliar_ativo: true, google_review_url: 'https://g.page/r/demo',
   fidelidade_ativo: true, fidelidade_meta: 10, fidelidade_premio: 'Um socorro grátis',
   comissao_tipo: 'percentual', comissao_valor: 10,
+  base_endereco: 'Av. Winston Churchill, 2500 - Pinheirinho, Curitiba - PR', base_lat: -25.5135, base_lng: -49.295, tarifa_km_desloc: null, tarifa_km_retorno: 3,
   pix_chave: '41999990000', pix_nome: 'Guincho Pinheirinho', pix_cidade: 'Curitiba',
   wa_ativo: true, wa_instancia: 'demo', wa_numero: '41999990000', wa_persona: null, wa_proativo_retorno: true, wa_proativo_pronto: true,
   perfil: 'oficina', vagas_funilaria: 1, carros_por_horario: 3,
@@ -109,7 +138,7 @@ const ch = (id: string, nome: string, telefone: string, veiculo: string, placa: 
   noturno: false, adicionais: [], motorista: null, pagador: null, pago: false, observacao: null, ...x });
 const agendamentos: Agendamento[] = [
   ch('a1', 'Thaís Guedes', '41990000020', 'Onix branco', 'RTY7A21', 'Reboque de carro', 'Av. das Torres, 1200, Uberaba', 'Auto Center Silva, Boqueirão', 14, 213, 'fila', min(4), { cotacao_enviada_em: min(2) }),
-  ch('a2', 'Rafael Cordeiro', '41990000021', 'CG 160 vermelha', null, 'Reboque de moto', 'R. Izaac Ferreira da Cruz, Sítio Cercado', 'Residência, Xaxim', 0, 0, 'fila', min(11), { observacao: 'Pneu traseiro furado', canal: 'link', origem_lat: -25.5402, origem_lng: -49.2655, tem_foto: true }),
+  ch('a2', 'Rafael Cordeiro', '41990000021', 'CG 160 vermelha', null, 'Reboque de moto', 'R. Izaac Ferreira da Cruz, Sítio Cercado', 'Residência, Xaxim', 0, 0, 'fila', min(11), { observacao: 'Pneu traseiro furado', canal: 'link', origem_lat: -25.5402, origem_lng: -49.2655, tem_foto: true, destino: 'R. Francisco Derosso, 1500 - Xaxim, Curitiba - PR', destino_lat: -25.501, destino_lng: -49.2633 }),
   ch('a3', 'Patrícia Souza', '41990000003', 'Compass branco', 'ABC1D23', 'Reboque de utilitário ou SUV', 'BR-277, km 78, sentido litoral', 'Concessionária Jeep, Rebouças', 31, 370, 'em_servico', min(26), { motorista: 'Arthur', adicionais: [{ nome: 'Patins', valor: 80 }] }),
   ch('a4', 'Oficina do Beto', '41988880001', 'Civic cinza', 'GHI3F67', 'Reboque de carro', 'R. Francisco Derosso, 3400, Xaxim', 'Oficina do Beto, Pinheirinho', 9, 191, 'pronto', min(48), { motorista: 'Madie', pagador: 'Oficina do Beto' }),
   ch('a5', 'Carlos Mendes', '41990000001', 'Hilux prata', 'DEF2E45', 'Socorro: bateria (chupeta)', 'Shopping Palladium, estacionamento G2', 'No local', 5, 120, 'entregue', min(140), { motorista: 'Arthur', pago: true }),
@@ -234,6 +263,11 @@ export function ativarDemo() {
     fotoChamado: async () => '/img/demo-foto-pedido.webp',
     salvarPedirConfig: async (_id: string, x: Partial<Loja>) => { Object.assign(loja, x); },
     salvarTarifas: async (_id: string, x: Partial<Loja>) => { Object.assign(loja, x); },
+    // Mapa simulado: endereços de Curitiba conhecidos e distância em linha reta × 1,35 (estrada), a 32 km/h de média.
+    buscarEndereco: async (q: string) => mapaDemo(q),
+    calcularRota: async (pts: { lat: number; lng: number }[]) => pts.slice(1).map((p, i) => {
+      const km = Math.round(distKm(pts[i], p) * 1.35 * 10) / 10; return { km, min: Math.round((km / 32) * 60) };
+    }),
     criarAgendamento: async (_l: string, x: Partial<Agendamento> & { nome: string; inicio: string; status: Agendamento['status'] }) => {
       const id = 'novo' + Date.now();
       agendamentos.push(ch(id, x.nome, x.telefone ?? '', x.veiculo ?? '', null, x.servico_nome ?? '', '', '', 0, 0, x.status, x.inicio));

@@ -17,16 +17,17 @@ export const tituloDia = (d: Date) => ({ semana: CURTOS[indice(d)], resto: `${d.
 export const dataCampo = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 /**
- * Estimativa de quanto o chamado ocupa o caminhão, em minutos. O banco não guarda hora de término:
- * a conta usa a distância. 30 min fixos (chegar, carregar e descarregar) + 2 min por km até 30 km
- * (cidade, cerca de 30 km/h) + 1 min por km acima disso (estrada). Sem km informado, 1 hora.
- * Arredonda para cima em blocos de 15 min, com mínimo de 45. Ex.: 6 km = 45 min; 18 km = 1h15; 110 km = 3h.
+ * Quanto o chamado ocupa o caminhão, em minutos. O banco não guarda hora de término.
+ * Com a rota do mapa: minutos de estrada dos três trechos + 30 min (carregar e descarregar).
+ * Sem rota: estimativa pelos km — 30 min fixos + 2 min por km até 30 km (cidade) + 1 min por km acima (estrada).
+ * Arredonda para cima em blocos de 15 min, com mínimo de 45. Sem km nenhum, 1 hora.
  */
-export function duracaoMin(a: Pick<Agendamento, 'km'>) {
-  const km = Number(a.km) || 0;
+export function duracaoMin(a: Pick<Agendamento, 'km' | 'km_desloc' | 'km_retorno' | 'min_rota'>) {
+  const blocos = (m: number) => Math.max(45, Math.ceil(m / 15) * 15);
+  if (a.min_rota) return blocos(Number(a.min_rota) + 30);
+  const km = (Number(a.km) || 0) + (Number(a.km_desloc) || 0) + (Number(a.km_retorno) || 0);
   if (!km) return 60;
-  const bruto = 30 + Math.min(km, 30) * 2 + Math.max(0, km - 30);
-  return Math.max(45, Math.ceil(bruto / 15) * 15);
+  return blocos(30 + Math.min(km, 30) * 2 + Math.max(0, km - 30));
 }
 
 const hhmm = (m: number) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;

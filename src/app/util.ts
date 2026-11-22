@@ -105,11 +105,29 @@ export function gerarPix(chave: string, nome: string, cidade: string, valor: num
 }
 
 /** Cotação do guincho: saída + km além da franquia, com acréscimo noturno, mais os adicionais. Arredonda para real cheio. */
-export function cotar(t: { tarifa_saida: number; tarifa_km: number; tarifa_franquia_km: number; tarifa_noturno_pct: number }, km: number, noturno: boolean, adicionais: { valor: number }[]) {
-  const kmCobrado = Math.max(0, km - Number(t.tarifa_franquia_km));
-  const rodagem = kmCobrado * Number(t.tarifa_km);
+/** Km de cada trecho do chamado: deslocamento (guincho até o veículo), transporte (veículo até o destino) e retorno (destino até a base). */
+export type KmTrechos = { desloc: number; transporte: number; retorno: number };
+type Tabela = { tarifa_saida: number; tarifa_km: number; tarifa_franquia_km: number; tarifa_noturno_pct: number; tarifa_km_desloc?: number | null; tarifa_km_retorno?: number | null };
+const ouPadrao = (v: number | null | undefined, padrao: number) => (v === null || v === undefined || (v as unknown) === '' ? padrao : Number(v));
+
+/**
+ * Valor do reboque: saída + deslocamento + transporte + retorno, cada trecho com o seu preço por km.
+ * A franquia (km já incluídos na saída) vale só no transporte. O acréscimo noturno vale sobre tudo, menos os adicionais.
+ * Ex.: saída 150, R$ 4,50/km nos três trechos, 4 + 10 + 7 km de dia = 150 + 18 + 45 + 31,50 = R$ 245.
+ * Aceita só um número (km do transporte), como antes.
+ */
+export function cotar(t: Tabela, km: number | KmTrechos, noturno: boolean, adicionais: { valor: number }[]) {
+  const k = typeof km === 'number' ? { desloc: 0, transporte: km, retorno: 0 } : km;
+  const precoKm = Number(t.tarifa_km);
+  const precoDesloc = ouPadrao(t.tarifa_km_desloc, precoKm);
+  const precoRetorno = ouPadrao(t.tarifa_km_retorno, precoKm);
+  const kmCobrado = Math.max(0, k.transporte - Number(t.tarifa_franquia_km));
+  const transporte = kmCobrado * precoKm;
+  const deslocamento = Math.max(0, k.desloc) * precoDesloc;
+  const retorno = Math.max(0, k.retorno) * precoRetorno;
+  const rodagem = deslocamento + transporte + retorno;
   const base = Number(t.tarifa_saida) + rodagem;
   const acrescimo = noturno ? base * (Number(t.tarifa_noturno_pct) / 100) : 0;
   const extras = adicionais.reduce((s, a) => s + Number(a.valor), 0);
-  return { saida: Number(t.tarifa_saida), kmCobrado, rodagem, acrescimo, extras, total: Math.round(base + acrescimo + extras) };
+  return { saida: Number(t.tarifa_saida), kmCobrado, rodagem, transporte, deslocamento, retorno, precoKm, precoDesloc, precoRetorno, acrescimo, extras, total: Math.round(base + acrescimo + extras) };
 }
