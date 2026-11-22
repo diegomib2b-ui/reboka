@@ -1312,7 +1312,7 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
    O cabeçalho grande de cada tela (título, descrição e botões com texto) fica só no computador. Vale para todas as telas. */
 .cabeca .btn > .icone { display: none; }
 .ficha-resumo-m { display: none; }
-.ch-abas-topo { display: none; }
+.ch-menu-btn, .ch-menu-fundo, .ch-aba-atual { display: none; }
 @media (max-width: 860px) {
   .casca { --ic-topo: min(44px, 10.4vw); }
   .topo-m { display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 6;
@@ -1335,14 +1335,21 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
   .folha > .cabeca .btn:disabled { opacity: .35; }
   .folha > .cabeca .btn > .icone { display: block; }
   .folha > .cabeca .btn > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  /* Chamados: as abas (Fila, Agendados, Entregues) ficam na barra, em ícone; a aba ativa é o quadrado grafite. */
+  /* Chamados: no topo ficam só o hambúrguer e o "+". As listas (Fila, Agendados, Entregues) e as configurações abrem no menu. */
   .ch-abas { display: none; }
-  .folha > .cabeca .ch-abas-topo { display: flex; align-items: center; gap: 0; margin-right: 4px; padding-right: 4px; border-right: 1px solid rgba(22, 24, 29, .28); }
-  .ch-abas-topo button { position: relative; display: inline-grid; place-items: center; width: var(--ic-topo); height: 40px; padding: 0; border: 0; background: none; color: var(--grafite); cursor: pointer; }
-  .ch-abas-topo button b { position: absolute; top: 1px; right: 0; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 8px; background: var(--grafite); color: #fff;
-    font: 700 .64rem/16px var(--fonte-texto); text-align: center; }
-  .ch-abas-topo button.on { background: var(--grafite); color: #fff; }
-  .ch-abas-topo button.on b { background: #fff; color: var(--grafite); }
+  .folha > .cabeca .ch-topo-acoes .btn-secundario { display: none; }
+  .ch-menu-btn { order: 2; display: inline-grid; place-items: center; width: var(--ic-topo); height: 44px; padding: 0; border: 0; background: none; color: var(--grafite); cursor: pointer; }
+  .ch-menu-btn[aria-expanded="true"] { background: var(--grafite); color: #fff; }
+  .ch-menu-fundo { display: block; position: fixed; inset: calc(52px + env(safe-area-inset-top)) 0 0 0; z-index: 8; background: rgba(22, 24, 29, .38); }
+  .ch-menu { position: absolute; top: 0; right: 0; width: min(300px, 86vw); background: #fff; border: 1px solid var(--borda); border-top: 0; box-shadow: var(--sombra-flutua); padding: 10px 0 8px; display: grid; }
+  .ch-menu .ch-rot { padding: 8px 18px 4px; }
+  .ch-menu button { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 14px; padding: 13px 18px; border: 0; background: none; text-align: left;
+    font: 600 1rem var(--fonte-texto); color: var(--grafite); cursor: pointer; }
+  .ch-menu button b { min-width: 26px; text-align: center; padding: 2px 8px; background: var(--nevoa); font-weight: 700; font-size: .88rem; }
+  .ch-menu button.on { background: var(--nevoa); box-shadow: inset 3px 0 0 var(--marca); }
+  .ch-menu button.on b { background: var(--grafite); color: #fff; }
+  .ch-aba-atual { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+  .ch-aba-atual b { font: 700 1.25rem var(--fonte-titulo); color: var(--grafite); }
 }
 @media (max-width: 350px) {
   .casca { --ic-topo: 9.6vw; }
