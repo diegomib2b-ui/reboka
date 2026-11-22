@@ -29,12 +29,12 @@ const p=estado.mpPosts[0];  ok(estado.loja.mp_assinatura_id==='pa1'&&j.url==='ht
 const assina=(id,rid,ts='1700000000')=>({ 'x-request-id':rid,'x-signature':`ts=${ts},v1=`+createHmac('sha256','segredo').update(`id:${id};request-id:${rid};ts:${ts};`).digest('hex')});
 r=await worker.fetch(req('/api/mp-webhook?data.id=pa1&type=subscription_preapproval',{body:{type:'subscription_preapproval',data:{id:'pa1'}},headers:{'x-request-id':'r','x-signature':'ts=1,v1=00'}}),env); ok(r.status===401,'aviso com assinatura falsa: 401');
 r=await worker.fetch(req('/api/mp-webhook?data.id=pa1&type=subscription_preapproval',{body:{type:'subscription_preapproval',data:{id:'pa1'}},headers:assina('pa1','r1')}),env);
-ok(r.status===200&&estado.loja.assinatura==='ativa'&&estado.loja.plano==='equipe'&&estado.loja.periodicidade==='anual'&&estado.loja.mp_assinatura_id==='pa1','aviso ativa a oficina no plano certo');
+ok(r.status===200&&estado.loja.assinatura==='ativa'&&estado.loja.plano==='equipe'&&estado.loja.periodicidade==='anual'&&estado.loja.mp_assinatura_id==='pa1','aviso ativa a empresa no plano certo');
 r=await worker.fetch(req('/api/assinar',{body:{plano:'essencial',ciclo:'mensal'}}),env); ok(r.status===400,'já ativa: não assina de novo');
 r=await worker.fetch(req('/api/mp-webhook?data.id=77&type=subscription_authorized_payment',{body:{type:'subscription_authorized_payment',data:{id:'77'}},headers:assina('77','r2')}),env); ok(r.status===200&&(await r.json()).situacao==='ativa','aviso de pagamento ressincroniza');
 // aviso atrasado de assinatura antiga cancelada não derruba a atual
 estado.mpStatus='cancelled'; r=await worker.fetch(req('/api/mp-webhook?data.id=velha&type=subscription_preapproval',{body:{type:'subscription_preapproval',data:{id:'velha'}},headers:assina('velha','r3')}),env); ok(estado.loja.assinatura==='ativa','assinatura antiga cancelada é ignorada'); estado.mpStatus='authorized';
-// outra oficina via sincronizar
-estado.ref='99999999-2222-3333-4444-555555555555|equipe|anual'; r=await worker.fetch(req('/api/sincronizar?id=pa9'),env); ok((await r.json()).ignorado==='assinatura de outra oficina','não sincroniza assinatura de outra oficina'); estado.ref=`${CL}|equipe|anual`;
+// outra empresa via sincronizar
+estado.ref='99999999-2222-3333-4444-555555555555|equipe|anual'; r=await worker.fetch(req('/api/sincronizar?id=pa9'),env); ok((await r.json()).ignorado==='assinatura de outra empresa','não sincroniza assinatura de outra empresa'); estado.ref=`${CL}|equipe|anual`;
 r=await worker.fetch(req('/api/cancelar'),env); ok(r.status===200&&estado.loja.assinatura==='cancelada'&&estado.loja.acesso_ate===estado.prox,'cancelar mantém acesso até o fim do período');
 ok(estado.eventos.length>=4,'eventos registrados: '+estado.eventos.length);
