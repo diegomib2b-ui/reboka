@@ -16,7 +16,9 @@ export type Loja = { id: string; nome: string; documento: string | null; plano: 
   /** Tabela de preço do guincho: a cotação do chamado sai destes números. */
   /** Link público "Pedir guincho": ligado ou não, e o WhatsApp que o cliente vê depois de pedir. */
   pedir_ativo: boolean; pedir_telefone: string | null;
-  tarifa_saida: number; tarifa_km: number; tarifa_franquia_km: number; tarifa_noturno_pct: number; tarifa_adicionais: Adicional[] };
+  tarifa_saida: number; tarifa_km: number; tarifa_franquia_km: number; tarifa_noturno_pct: number; tarifa_adicionais: Adicional[];
+  /** Base do guincho e preço por km do deslocamento e do retorno (vazio = o mesmo do transporte). Migration 0027. */
+  base_endereco?: string | null; base_lat?: number | null; base_lng?: number | null; tarifa_km_desloc?: number | null; tarifa_km_retorno?: number | null };
 export type Adicional = { nome: string; valor: number };
 export type Membro = { loja_id: string; usuario_id: string; papel: Papel; nome: string; reboka_lojas: Loja };
 export type Pessoa = { usuario_id: string; nome: string; papel: Papel; criado_em: string };
@@ -104,13 +106,18 @@ export type Agendamento = {
   adicionais: Adicional[]; motorista: string | null; placa: string | null; pagador: string | null; pago: boolean; observacao: string | null;
   /** 'link' quando o cliente pediu pelo link público; com a posição do celular, se ele enviou. */
   canal?: string | null; origem_lat?: number | null; origem_lng?: number | null; tem_foto?: boolean; cotacao_enviada_em?: string | null;
+  /** Rota (migration 0027): de onde o guincho saiu, o destino no mapa e os km de cada trecho. km = transporte. */
+  partida_endereco?: string | null; partida_lat?: number | null; partida_lng?: number | null; destino_lat?: number | null; destino_lng?: number | null;
+  km_desloc?: number | null; km_retorno?: number | null; min_rota?: number | null;
 };
 export type PedirInfo = { nome: string; telefone: string | null; servicos: string[] };
 export type Pedido = { nome: string; telefone: string; veiculo: string; placa: string; servico: string; origem: string; destino: string; observacao: string; lat: number | null; lng: number | null };
 /** Fases do chamado na tela. No banco são os status do motor: fila, em_servico, pronto e entregue (confirmado = agendado). */
 export type NovoChamado = { nome: string; telefone: string | null; veiculo: string | null; placa: string | null; servico_nome: string | null;
   origem: string | null; destino: string | null; km: number | null; valor: number | null; noturno: boolean; adicionais: Adicional[];
-  motorista: string | null; pagador: string | null; observacao: string | null; inicio: string; status: Agendamento['status'] };
+  motorista: string | null; pagador: string | null; observacao: string | null; inicio: string; status: Agendamento['status'] } & Partial<Pick<Agendamento, CamposRota>>;
+/** Campos da rota que a cotação grava junto com o valor. */
+export type CamposRota = 'partida_endereco' | 'partida_lat' | 'partida_lng' | 'origem_lat' | 'origem_lng' | 'destino_lat' | 'destino_lng' | 'km_desloc' | 'km_retorno' | 'min_rota';
 export type AgendaServico = { nome: string; valor: number };
 export type Avaliacao = { id: string; nota: number; comentario: string | null; nome: string | null; criado_em: string };
 export type AvaliarInfo = { loja_id: string; nome: string; google_url: string | null };
@@ -519,7 +526,7 @@ export const api = {
   async criarChamado(lojaId: string, d: NovoChamado) {
     return ok(await sb.from('reboka_agendamentos').insert({ loja_id: lojaId, ...d, telefone: d.telefone ? d.telefone.replace(/\D/g, '') : null }).select('id'));
   },
-  async atualizarChamado(id: string, d: Partial<Pick<Agendamento, 'motorista' | 'valor' | 'km' | 'pago' | 'pagador' | 'observacao' | 'destino' | 'origem' | 'noturno' | 'adicionais' | 'cotacao_enviada_em'>>) {
+  async atualizarChamado(id: string, d: Partial<Pick<Agendamento, 'motorista' | 'valor' | 'km' | 'pago' | 'pagador' | 'observacao' | 'destino' | 'origem' | 'noturno' | 'adicionais' | 'cotacao_enviada_em' | CamposRota>>) {
     ok(await sb.from('reboka_agendamentos').update(d).eq('id', id).select('id'));
   },
   /** Entregar o chamado: marca entregue e lança o valor cobrado no financeiro (acha ou cria o cliente pelo telefone). */
@@ -568,7 +575,18 @@ export const api = {
     if (r.error?.message.includes('duplicate')) throw new Error('Esse link já está em uso. Tente de novo.');
     ok(r);
   },
-  async salvarTarifas(lojaId: string, d: Pick<Loja, 'tarifa_saida' | 'tarifa_km' | 'tarifa_franquia_km' | 'tarifa_noturno_pct' | 'tarifa_adicionais'>) {
+  /** Mapa: endereço digitado vira ponto. Devolve null quando o mapa não está configurado (a tela volta ao km digitado). */
+  async buscarEndereco(q: string, perto?: Ponto | null): Promise<Lugar[] | null> {
+    const p = perto ? `&lat=${perto.lat}&lng=${perto.lng}` : '';
+    const r = await mapaServidor<{ enderecos: Lugar[] }>(`/api/mapa/endereco?q=${encodeURIComponent(q)}${p}`);
+    return r && r.enderecos;
+  },
+  /** Mapa: km e minutos de cada trecho entre 2 a 4 pontos, na ordem. Null quando o mapa não está configurado. */
+  async calcularRota(pontos: Ponto[]): Promise<{ km: number; min: number }[] | null> {
+    const r = await mapaServidor<{ trechos: { km: number; min: number }[] }>('/api/mapa/rota', { pontos });
+    return r && r.trechos;
+  },
+  async salvarTarifas(lojaId: string, d: Pick<Loja, 'tarifa_saida' | 'tarifa_km' | 'tarifa_franquia_km' | 'tarifa_noturno_pct' | 'tarifa_adicionais' | 'base_endereco' | 'base_lat' | 'base_lng' | 'tarifa_km_desloc' | 'tarifa_km_retorno'>) {
     ok(await sb.from('reboka_lojas').update(d).eq('id', lojaId).select('id'));
   },
   async mudarStatusAgendamento(id: string, status: Agendamento['status']) {
@@ -633,6 +651,17 @@ export function acessoLiberado(c: Loja): boolean {
   if (c.assinatura === 'ativa' || c.assinatura === 'atrasada') return true;
   if (c.assinatura === 'teste') return new Date(c.teste_termina_em).getTime() > Date.now();
   return !!c.acesso_ate && new Date(c.acesso_ate).getTime() > Date.now();
+}
+
+export type Ponto = { lat: number; lng: number };
+export type Lugar = Ponto & { texto: string };
+async function mapaServidor<T>(caminho: string, corpo?: unknown): Promise<T | null> {
+  const { data } = await sb.auth.getSession();
+  const r = await fetch(caminho, { method: corpo === undefined ? 'GET' : 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${data.session?.access_token ?? ''}` }, body: corpo === undefined ? undefined : JSON.stringify(corpo) });
+  const j = (await r.json().catch(() => ({}))) as { erro?: string; semMapa?: boolean };
+  if (r.status === 503 && j.semMapa) return null;
+  if (!r.ok) throw new Error(j.erro ?? 'Não foi possível falar com o mapa.');
+  return j as T;
 }
 
 /** Chamadas ao servidor do Reboka (Worker). Vai junto o login da pessoa, para o servidor saber quem está pedindo. */

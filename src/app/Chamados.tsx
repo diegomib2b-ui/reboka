@@ -1,9 +1,10 @@
 import { Icone } from './icones';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { api, type Loja, type Agendamento, type Servico, type Adicional } from './api';
+import { api, type Loja, type Agendamento, type Servico, type Adicional, type CamposRota } from './api';
 import { Janela, Campo, Aviso, SkCard } from './ui';
 import CobrarPix from './CobrarPix';
 import { brl, cotar, linkWhatsApp, telefoneBR } from './util';
+import Trajeto, { CampoEndereco, baseDe, camposDoTrajeto, kmNum, minhaPosicao, temPonto, trajetoInicial, type Local, type TrajetoDados } from './Trajeto';
 import { FaixaSemana, GradeHoras, dataCampo, mesmoDia, semanaDe, tituloDia, zeroHora } from './AgendaChamados';
 
 // Fases do chamado. No banco são os status do motor (ver migration 0024).
@@ -19,7 +20,13 @@ const AGENDADO_SOBE_MIN = 60;   // remoção agendada entra na fila quando falta
 const minutosDesde = (iso: string) => Math.round((Date.now() - new Date(iso).getTime()) / 60000);
 const tempoCurto = (m: number) => (m < 1 ? 'agora' : m < 60 ? `${m} min` : m < 1440 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60}` : ''}` : `${Math.floor(m / 1440)} d`);
 // "Av. das Torres, 1200, Uberaba" vira "Uberaba": na linha da fila cabe só o bairro ou a referência final.
-const curto = (t: string | null | undefined) => { const p = (t ?? '').split(',').map((x) => x.trim()).filter(Boolean); return p[p.length - 1] ?? ''; };
+// Endereço que veio do mapa ("R. X, 1500 - Xaxim, Curitiba - PR") também vira só "Xaxim": tira a cidade e o número.
+const curto = (t: string | null | undefined) => {
+  const p = (t ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+  if (p.length > 1 && /\s-\s[A-Z]{2}$/.test(p[p.length - 1])) p.pop();
+  const u = p[p.length - 1] ?? '';
+  return /^\d+\w*\s-\s/.test(u) ? u.replace(/^\d+\w*\s-\s/, '') : u;
+};
 const respondido = (a: Agendamento) => !!a.valor && (!!a.cotacao_enviada_em || !a.telefone);
 /** Ordem da fila: 0 novo sem resposta, 1 novo já cotado, 2 agendado que está chegando, 3 carregado, 4 a caminho. */
 function prioridade(a: Agendamento) {
@@ -44,8 +51,9 @@ const haQuanto = (iso: string) => {
 };
 const quando = (iso: string) => new Date(iso).toLocaleString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 const hojeLocal = (iso: string) => new Date(iso).toDateString() === new Date().toDateString();
-const rotaMaps = (origem: string, destino: string) =>
-  `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origem)}&destination=${encodeURIComponent(destino)}&travelmode=driving`;
+const rotaMaps = (origem: string, destino: string, parada?: string) =>
+  `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origem)}&destination=${encodeURIComponent(destino)}${parada ? `&waypoints=${encodeURIComponent(parada)}` : ''}&travelmode=driving`;
+const kmBr = (n: number | null | undefined) => `${Number(n).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`;
 const primeiro = (n: string) => n.trim().split(' ')[0];
 // Ponto de partida para o mapa: a posição do celular do cliente, quando ele enviou pelo link; senão, o endereço escrito.
 const partida = (a: Agendamento) => (a.origem_lat != null && a.origem_lng != null ? `${a.origem_lat},${a.origem_lng}` : a.origem || '');
@@ -243,11 +251,14 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
         <div className="det-sec">
           <span className="det-rot">Trajeto</span>
           <ol className="ch-rota">
-            <li><i className="ch-pt ch-pt-a" aria-hidden="true" />{a.origem || 'Origem não informada'}</li>
-            <li><i className="ch-pt ch-pt-b" aria-hidden="true" />{a.destino || 'Destino não informado'}{a.km ? <em>{Number(a.km)} km</em> : null}</li>
+            {a.partida_lat != null && <li><i className="ch-pt ch-pt-g" aria-hidden="true" />{a.partida_endereco || 'Ponto de partida'}{a.km_desloc ? <em>{kmBr(a.km_desloc)}</em> : null}</li>}
+            <li><i className="ch-pt ch-pt-a" aria-hidden="true" />{a.origem || 'Origem não informada'}{a.partida_lat != null && a.km ? <em>{kmBr(a.km)}</em> : null}</li>
+            <li><i className="ch-pt ch-pt-b" aria-hidden="true" />{a.destino || 'Destino não informado'}{a.partida_lat == null && a.km ? <em>{kmBr(a.km)}</em> : a.km_retorno ? <em>{kmBr(a.km_retorno)}</em> : null}</li>
+            {!!a.km_retorno && loja.base_lat != null && <li><i className="ch-pt ch-pt-base" aria-hidden="true" />{loja.base_endereco || 'Base'}</li>}
           </ol>
+          {(a.km_desloc || a.km_retorno) && <p className="dica sem-topo">Deslocamento {kmBr(a.km_desloc ?? 0)} · Transporte {kmBr(a.km ?? 0)} · Retorno {kmBr(a.km_retorno ?? 0)}{a.min_rota ? ` · cerca de ${a.min_rota} min de estrada` : ''}</p>}
           {a.origem_lat != null && <a className="link" href={pontoMaps(a)} target="_blank" rel="noopener">Ver no mapa onde o cliente está</a>}
-          {partida(a) && a.destino && <a className="link" href={rotaMaps(partida(a), a.destino)} target="_blank" rel="noopener">Abrir a rota no Google Maps</a>}
+          {partida(a) && a.destino && <a className="link" href={a.partida_lat != null ? rotaMaps(`${a.partida_lat},${a.partida_lng}`, a.destino_lat != null ? `${a.destino_lat},${a.destino_lng}` : a.destino, partida(a)) : rotaMaps(partida(a), a.destino)} target="_blank" rel="noopener">Abrir a rota no Google Maps</a>}
         </div>
         <div className="det-sec">
           <span className="det-rot">Cobrança</span>
@@ -410,45 +421,50 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
 }
 
 /** Cotação de um chamado que já existe (por exemplo, um pedido que chegou pelo link sem distância). */
+/** Conta do reboque mostrada na cotação: saída, cada trecho, noturno e adicionais. */
+function Conta({ loja, c, socorro, noturno }: { loja: Loja; c: ReturnType<typeof cotar>; socorro?: Servico; noturno: boolean }) {
+  const real = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const km = (n: number, preco: number) => `${n.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km × ${real(preco)}`;
+  return (
+    <dl className="ch-conta">
+      {socorro ? <><dt>{socorro.nome}</dt><dd>{brl(socorro.valor_medio)}</dd></> : <>
+        <dt>Saída</dt><dd>{brl(c.saida)}</dd>
+        {c.deslocamento > 0 && <><dt>Deslocamento · {km(c.deslocamento / c.precoDesloc, c.precoDesloc)}</dt><dd>{brl(c.deslocamento)}</dd></>}
+        <dt>Transporte · {km(c.kmCobrado, c.precoKm)}{Number(loja.tarifa_franquia_km) > 0 ? ` (${loja.tarifa_franquia_km} km na saída)` : ''}</dt><dd>{brl(c.transporte)}</dd>
+        {c.retorno > 0 && <><dt>Retorno · {km(c.retorno / c.precoRetorno, c.precoRetorno)}</dt><dd>{brl(c.retorno)}</dd></>}
+        {noturno && <><dt>Acréscimo noturno</dt><dd>{brl(c.acrescimo)}</dd></>}
+      </>}
+      {c.extras > 0 && <><dt>Adicionais</dt><dd>{brl(c.extras)}</dd></>}
+    </dl>
+  );
+}
+const kmTrechos = (t: TrajetoDados) => ({ desloc: kmNum(t.km.desloc), transporte: kmNum(t.km.transporte), retorno: kmNum(t.km.retorno) });
+
+type DadosCotacao = Partial<Pick<Agendamento, CamposRota | 'origem' | 'destino' | 'km'>> & { valor: number; noturno: boolean; adicionais: Adicional[] };
 function Cotar({ loja, a, servicos, aoSalvar, aoCancelar }: { loja: Loja; a: Agendamento; servicos: Servico[];
-  aoSalvar: (d: { km: number | null; valor: number; noturno: boolean; adicionais: Adicional[] }, enviar: boolean) => void; aoCancelar: () => void }) {
-  const [km, setKm] = useState(a.km ? String(Number(a.km)).replace('.', ',') : '');
+  aoSalvar: (d: DadosCotacao, enviar: boolean) => void; aoCancelar: () => void }) {
+  const [trajeto, setTrajeto] = useState<TrajetoDados>(() => trajetoInicial(loja, a));
   const [noturno, setNoturno] = useState(a.noturno || (() => { const h = new Date().getHours(); return h >= 20 || h < 6 || new Date().getDay() === 0; })());
   const [marcados, setMarcados] = useState<string[]>((a.adicionais ?? []).map((x) => x.nome));
   const [valorManual, setValorManual] = useState<string | null>(null);
   const opcoes: Adicional[] = loja.tarifa_adicionais ?? [];
   const escolhidos = opcoes.filter((o) => marcados.includes(o.nome));
   const socorro = servicos.find((s) => s.nome === a.servico_nome && /^socorro/i.test(s.nome));
-  const kmNum = Number(km.replace(',', '.')) || 0;
-  const c = cotar(loja, kmNum, noturno, escolhidos);
-  const calculado = socorro ? Math.round(Number(socorro.valor_medio) * (noturno ? 1 + loja.tarifa_noturno_pct / 100 : 1) + c.extras) : c.total;
+  const c = cotar(loja, socorro ? { ...kmTrechos(trajeto), transporte: 0 } : kmTrechos(trajeto), noturno, escolhidos);
+  const calculado = socorro ? Math.round((Number(socorro.valor_medio) + c.deslocamento + c.retorno) * (noturno ? 1 + loja.tarifa_noturno_pct / 100 : 1) + c.extras) : c.total;
   const valor = valorManual !== null ? Number(valorManual.replace(',', '.')) || 0 : calculado;
-  const dados = () => ({ km: kmNum || null, valor, noturno, adicionais: escolhidos });
+  const dados = (): DadosCotacao => ({ ...camposDoTrajeto(trajeto), valor, noturno, adicionais: escolhidos });
   const alternar = (n: string) => { setMarcados((m) => (m.includes(n) ? m.filter((x) => x !== n) : [...m, n])); setValorManual(null); };
   return (
     <form className="ch-cotar" onSubmit={(e) => { e.preventDefault(); aoSalvar(dados(), !!a.telefone); }}>
-      <ol className="ch-rota">
-        <li><i className="ch-pt ch-pt-a" aria-hidden="true" />{a.origem || 'Origem não informada'}</li>
-        <li><i className="ch-pt ch-pt-b" aria-hidden="true" />{a.destino || 'Destino não informado'}</li>
-      </ol>
-      {partida(a) && a.destino
-        ? <a className="link" href={rotaMaps(partida(a), a.destino)} target="_blank" rel="noopener">Ver a distância no Google Maps</a>
-        : a.origem_lat != null && <a className="link" href={pontoMaps(a)} target="_blank" rel="noopener">Ver no mapa onde o cliente está</a>}
-      {!socorro && <Campo rotulo="Distância (km)"><input autoFocus inputMode="decimal" value={km} onChange={(e) => { setKm(e.target.value); setValorManual(null); }} placeholder="14" /></Campo>}
+      <Trajeto loja={loja} valor={trajeto} aoMudar={(t) => { setTrajeto(t); setValorManual(null); }} />
       <label className="marcar"><input type="checkbox" checked={noturno} onChange={(e) => { setNoturno(e.target.checked); setValorManual(null); }} /> Noturno, domingo ou feriado (+{loja.tarifa_noturno_pct}%)</label>
       {opcoes.length > 0 && (
         <div className="ch-adic">
           {opcoes.map((o) => <button key={o.nome} type="button" className={marcados.includes(o.nome) ? 'on' : ''} aria-pressed={marcados.includes(o.nome)} onClick={() => alternar(o.nome)}>{o.nome}<small>+{brl(o.valor)}</small></button>)}
         </div>
       )}
-      <dl className="ch-conta">
-        {socorro ? <><dt>{socorro.nome}</dt><dd>{brl(socorro.valor_medio)}</dd></> : <>
-          <dt>Saída</dt><dd>{brl(c.saida)}</dd>
-          <dt>{c.kmCobrado.toLocaleString('pt-BR')} km × {Number(loja.tarifa_km).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</dt><dd>{brl(c.rodagem)}</dd>
-          {noturno && <><dt>Acréscimo noturno</dt><dd>{brl(c.acrescimo)}</dd></>}
-        </>}
-        {c.extras > 0 && <><dt>Adicionais</dt><dd>{brl(c.extras)}</dd></>}
-      </dl>
+      <Conta loja={loja} c={c} socorro={socorro} noturno={noturno} />
       <label className="ch-total">
         <span>Valor do chamado</span>
         <span className="ch-total-campo"><i>R$</i><input inputMode="numeric" value={valorManual ?? String(calculado)} onChange={(e) => setValorManual(e.target.value.replace(/[^\d.,]/g, ''))} aria-label="Valor do chamado em reais" /></span>
@@ -468,9 +484,7 @@ function FormChamado({ loja, servicos, aoSalvar, aoCancelar }: { loja: Loja; ser
   const [veiculo, setVeiculo] = useState('');
   const [placa, setPlaca] = useState('');
   const [servico, setServico] = useState('');
-  const [origem, setOrigem] = useState('');
-  const [destino, setDestino] = useState('');
-  const [km, setKm] = useState('');
+  const [trajeto, setTrajeto] = useState<TrajetoDados>(() => trajetoInicial(loja));
   const [noturno, setNoturno] = useState(() => { const h = new Date().getHours(); return h >= 20 || h < 6 || new Date().getDay() === 0; });
   const [marcados, setMarcados] = useState<string[]>([]);
   const [pagador, setPagador] = useState('');
@@ -485,9 +499,9 @@ function FormChamado({ loja, servicos, aoSalvar, aoCancelar }: { loja: Loja; ser
   const opcoes: Adicional[] = loja.tarifa_adicionais ?? [];
   const escolhidos = opcoes.filter((o) => marcados.includes(o.nome));
   const socorro = servicos.find((s) => s.nome === servico && /^socorro/i.test(s.nome));
-  // Reboque: saída + km. Socorro (bateria, pneu, pane seca): preço fechado do serviço.
-  const c = useMemo(() => cotar(loja, Number(km.replace(',', '.')) || 0, noturno, escolhidos), [loja, km, noturno, marcados.join('|')]);
-  const calculado = socorro ? Math.round(Number(socorro.valor_medio) * (noturno ? 1 + loja.tarifa_noturno_pct / 100 : 1) + c.extras) : c.total;
+  // Reboque: saída + deslocamento + transporte + retorno. Socorro (bateria, pneu, pane seca): preço fechado + deslocamento e retorno.
+  const c = useMemo(() => cotar(loja, socorro ? { ...kmTrechos(trajeto), transporte: 0 } : kmTrechos(trajeto), noturno, escolhidos), [loja, trajeto.km, noturno, marcados.join('|'), !!socorro]);
+  const calculado = socorro ? Math.round((Number(socorro.valor_medio) + c.deslocamento + c.retorno) * (noturno ? 1 + loja.tarifa_noturno_pct / 100 : 1) + c.extras) : c.total;
   const valor = valorManual !== null ? Number(valorManual) || 0 : calculado;
 
   function alternar(n: string) { setMarcados((m) => (m.includes(n) ? m.filter((x) => x !== n) : [...m, n])); }
@@ -499,7 +513,7 @@ function FormChamado({ loja, servicos, aoSalvar, aoCancelar }: { loja: Loja; ser
     try {
       await api.criarChamado(loja.id, {
         nome: nome.trim(), telefone: tel.trim() || null, veiculo: veiculo.trim() || null, placa: placa.trim().toUpperCase() || null,
-        servico_nome: servico || null, origem: origem.trim() || null, destino: destino.trim() || null, km: Number(km.replace(',', '.')) || null,
+        servico_nome: servico || null, ...camposDoTrajeto(trajeto),
         valor, noturno, adicionais: escolhidos, motorista: null, pagador: pagador.trim() || null, observacao: obs.trim() || null,
         inicio: agendar ? new Date(`${data}T${hora}`).toISOString() : new Date().toISOString(), status: agendar ? 'confirmado' : 'fila',
       });
@@ -524,15 +538,8 @@ function FormChamado({ loja, servicos, aoSalvar, aoCancelar }: { loja: Loja; ser
             {servicos.map((s) => <option key={s.id} value={s.nome}>{s.nome}</option>)}
           </select>
         </Campo>
-        <Campo rotulo="Onde o veículo está"><input value={origem} onChange={(e) => setOrigem(e.target.value)} placeholder="Rua, número, bairro ou referência" /></Campo>
-        <Campo rotulo="Para onde vai"><input value={destino} onChange={(e) => setDestino(e.target.value)} placeholder="Oficina, casa ou pátio" /></Campo>
-        <div className="dupla">
-          <Campo rotulo="Distância (km)" dica={origem && destino ? undefined : 'Preencha origem e destino para ver a rota.'}>
-            <input inputMode="decimal" value={km} onChange={(e) => { setKm(e.target.value); setValorManual(null); }} placeholder="14" />
-          </Campo>
-          <Campo rotulo="Quem paga (se não for o cliente)"><input value={pagador} onChange={(e) => setPagador(e.target.value)} placeholder="Oficina, seguradora" /></Campo>
-        </div>
-        {origem && destino && <a className="link ch-maps" href={rotaMaps(origem, destino)} target="_blank" rel="noopener">Ver a distância no Google Maps</a>}
+        <Trajeto loja={loja} valor={trajeto} aoMudar={(t) => { setTrajeto(t); setValorManual(null); }} />
+        <Campo rotulo="Quem paga (se não for o cliente)"><input value={pagador} onChange={(e) => setPagador(e.target.value)} placeholder="Oficina, seguradora" /></Campo>
         <Campo rotulo="Observação"><input value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Pneu travado, sem chave, garagem baixa" /></Campo>
       </div>
 
@@ -548,14 +555,7 @@ function FormChamado({ loja, servicos, aoSalvar, aoCancelar }: { loja: Loja; ser
             ))}
           </div>
         )}
-        <dl className="ch-conta">
-          {socorro ? <><dt>{socorro.nome}</dt><dd>{brl(socorro.valor_medio)}</dd></> : <>
-            <dt>Saída</dt><dd>{brl(c.saida)}</dd>
-            <dt>{c.kmCobrado.toLocaleString('pt-BR')} km × {Number(loja.tarifa_km).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</dt><dd>{brl(c.rodagem)}</dd>
-            {noturno && <><dt>Acréscimo noturno</dt><dd>{brl(c.acrescimo)}</dd></>}
-          </>}
-          {c.extras > 0 && <><dt>Adicionais</dt><dd>{brl(c.extras)}</dd></>}
-        </dl>
+        <Conta loja={loja} c={c} socorro={socorro} noturno={noturno} />
         <label className="ch-total">
           <span>Valor do chamado</span>
           <span className="ch-total-campo"><i>R$</i><input inputMode="numeric" value={valorManual ?? String(calculado)} onChange={(e) => setValorManual(e.target.value.replace(/[^\d.,]/g, ''))} aria-label="Valor do chamado em reais" /></span>
@@ -645,6 +645,11 @@ function Despacho({ a, motoristas, aoConfirmar, aoCancelar }: { a: Agendamento; 
 function Tarifas({ loja, aoSalvar, aoCancelar }: { loja: Loja; aoSalvar: () => void; aoCancelar: () => void }) {
   const [saida, setSaida] = useState(String(Number(loja.tarifa_saida)));
   const [km, setKm] = useState(String(Number(loja.tarifa_km)).replace('.', ','));
+  const preco = (v: number | null | undefined) => (v === null || v === undefined ? '' : String(Number(v)).replace('.', ','));
+  const [kmDesloc, setKmDesloc] = useState(preco(loja.tarifa_km_desloc));
+  const [kmRetorno, setKmRetorno] = useState(preco(loja.tarifa_km_retorno));
+  const [base, setBase] = useState<Local>(baseDe(loja) ?? { texto: loja.base_endereco ?? '', lat: null, lng: null });
+  const [gps, setGps] = useState('');
   const [franquia, setFranquia] = useState(String(loja.tarifa_franquia_km));
   const [noturno, setNoturno] = useState(String(loja.tarifa_noturno_pct));
   const [adic, setAdic] = useState<{ nome: string; valor: string }[]>((loja.tarifa_adicionais ?? []).map((a) => ({ nome: a.nome, valor: String(a.valor) })));
@@ -653,23 +658,39 @@ function Tarifas({ loja, aoSalvar, aoCancelar }: { loja: Loja; aoSalvar: () => v
   async function enviar(e: FormEvent) {
     e.preventDefault();
     try {
+      if (base.texto.trim() && !temPonto(base)) { setErro('Escolha o endereço da base em uma das sugestões, ou use a localização deste celular.'); return; }
       await api.salvarTarifas(loja.id, { tarifa_saida: num(saida), tarifa_km: num(km), tarifa_franquia_km: Math.round(num(franquia)), tarifa_noturno_pct: Math.round(num(noturno)),
+        tarifa_km_desloc: kmDesloc.trim() ? num(kmDesloc) : null, tarifa_km_retorno: kmRetorno.trim() ? num(kmRetorno) : null,
+        base_endereco: base.texto.trim() || null, base_lat: base.lat, base_lng: base.lng,
         tarifa_adicionais: adic.filter((a) => a.nome.trim()).map((a) => ({ nome: a.nome.trim(), valor: num(a.valor) })) });
       aoSalvar();
     } catch (e) { setErro((e as Error).message); }
   }
-  const exemplo = cotar({ tarifa_saida: num(saida), tarifa_km: num(km), tarifa_franquia_km: num(franquia), tarifa_noturno_pct: num(noturno) }, 20, false, []).total;
+  const exemplo = cotar({ tarifa_saida: num(saida), tarifa_km: num(km), tarifa_franquia_km: num(franquia), tarifa_noturno_pct: num(noturno),
+    tarifa_km_desloc: kmDesloc.trim() ? num(kmDesloc) : null, tarifa_km_retorno: kmRetorno.trim() ? num(kmRetorno) : null }, { desloc: 5, transporte: 20, retorno: 15 }, false, []).total;
+  async function baseAqui() {
+    setGps('Localizando…');
+    try { const p = await minhaPosicao(); setBase({ texto: base.texto.trim() || 'Base do guincho', ...p }); setGps('Base marcada na localização deste celular.'); }
+    catch (e) { setGps((e as Error).message); }
+  }
   return (
     <form onSubmit={enviar}>
       <div className="dupla">
         <Campo rotulo="Saída (R$)" dica="Valor fixo para o caminhão sair."><input inputMode="decimal" value={saida} onChange={(e) => setSaida(e.target.value)} /></Campo>
-        <Campo rotulo="Por km (R$)"><input inputMode="decimal" value={km} onChange={(e) => setKm(e.target.value)} /></Campo>
+        <Campo rotulo="Por km no transporte (R$)" dica="Do veículo até o destino."><input inputMode="decimal" value={km} onChange={(e) => setKm(e.target.value)} /></Campo>
+      </div>
+      <div className="dupla">
+        <Campo rotulo="Por km no deslocamento (R$)" dica="Até o veículo. Vazio = igual ao transporte."><input inputMode="decimal" value={kmDesloc} onChange={(e) => setKmDesloc(e.target.value)} placeholder={km} /></Campo>
+        <Campo rotulo="Por km no retorno (R$)" dica="Do destino à base. Vazio = igual ao transporte."><input inputMode="decimal" value={kmRetorno} onChange={(e) => setKmRetorno(e.target.value)} placeholder={km} /></Campo>
       </div>
       <div className="dupla">
         <Campo rotulo="Km já incluídos na saída" dica="Zero cobra desde o primeiro km."><input inputMode="numeric" value={franquia} onChange={(e) => setFranquia(e.target.value)} /></Campo>
         <Campo rotulo="Acréscimo noturno (%)" dica="Noite, domingo e feriado."><input inputMode="numeric" value={noturno} onChange={(e) => setNoturno(e.target.value)} /></Campo>
       </div>
-      <p className="dica">Exemplo: um reboque de 20 km durante o dia sai por <b>{brl(exemplo)}</b>.</p>
+      <p className="dica">Exemplo de dia: guincho a 5 km do veículo, reboque de 20 km e 15 km de volta à base saem por <b>{brl(exemplo)}</b>.</p>
+      <span className="det-rot">Base do guincho</span>
+      <CampoEndereco rotulo="Endereço do pátio" valor={base} aoMudar={setBase} placeholder="Rua, número e bairro"
+        extra={<p className="dica sem-topo">O retorno é calculado até aqui. <button type="button" className="link" onClick={baseAqui}>Usar a localização deste celular</button>{gps ? ` ${gps}` : ''}</p>} />
       <span className="det-rot">Adicionais</span>
       {adic.map((a, i) => (
         <div key={i} className="ch-adic-linha">
