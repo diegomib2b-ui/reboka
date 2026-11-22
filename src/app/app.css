@@ -1291,7 +1291,6 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
 
 @media (max-width: 820px) {
   .ch-cabeca h1 { font-size: 1.6rem; }
-  .ch-novo-desk { display: none; }
   .ch-cabeca { gap: 10px; margin-bottom: 12px; }
   .ch-topo-acoes { width: 100%; flex-wrap: nowrap; gap: 8px; }
   .ch-topo-acoes .btn { width: auto; flex: 1 1 0; padding: 8px 10px; font-size: .86rem; min-height: 0; white-space: nowrap; }
@@ -1337,7 +1336,6 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
   .folha > .cabeca .btn:disabled { opacity: .35; }
   .folha > .cabeca .btn > .icone { display: block; }
   .folha > .cabeca .btn > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .folha > .cabeca .ch-novo-desk { display: none; }
   .ficha-resumo-m { display: grid; gap: 4px; margin-bottom: 18px; }
   .ficha-resumo-m h2 { font-size: 1.5rem; }
   .ficha-resumo-m p { color: var(--cinza); margin: 0; }
