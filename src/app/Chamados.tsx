@@ -261,6 +261,14 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
     <>
       <header className="cabeca ch-cabeca">
         <h1>Chamados</h1>
+        {/* No celular as abas sobem para a barra do topo, em ícone com o contador. */}
+        <div className="ch-abas-topo" role="tablist" aria-label="Lista">
+          {ABAS.map((x) => (
+            <button key={x.v} type="button" role="tab" aria-selected={aba === x.v} aria-label={`${x.rot}: ${x.n}`} title={x.rot} className={aba === x.v ? 'on' : ''} onClick={() => { setAba(x.v); setSelId(null); }}>
+              <Icone nome={x.v === 'fila' ? 'servicos' : x.v === 'agendados' ? 'agenda' : 'selo'} tamanho={22} /><b>{x.n}</b>
+            </button>
+          ))}
+        </div>
         <div className="ch-topo-acoes">
           {gestao && <button type="button" className="btn btn-secundario" onClick={() => setLinkAberto(true)} title="Link de pedidos"><Icone nome="elo" tamanho={22} /><span>Link de pedidos</span></button>}
           {gestao && <button type="button" className="btn btn-secundario" onClick={() => setTarifas(true)} title="Tabela de preço"><Icone nome="etiqueta" tamanho={22} /><span>Tabela de preço</span></button>}

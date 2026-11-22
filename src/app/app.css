@@ -1312,7 +1312,9 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
    O cabeçalho grande de cada tela (título, descrição e botões com texto) fica só no computador. Vale para todas as telas. */
 .cabeca .btn > .icone { display: none; }
 .ficha-resumo-m { display: none; }
+.ch-abas-topo { display: none; }
 @media (max-width: 860px) {
+  .casca { --ic-topo: min(44px, 10.4vw); }
   .topo-m { display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 6;
     box-sizing: border-box; height: calc(52px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 150px 0 16px; background: var(--marca);
     box-shadow: 0 1px 0 rgba(22, 24, 29, .14); }
@@ -1327,12 +1329,26 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
     display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 2px; width: auto; max-width: none; background: none; }
   .folha > .cabeca h1, .folha > .cabeca p, .folha > .cabeca .ficha-carro, .folha > .cabeca .obs { display: none; }
   .folha > .cabeca > div { display: flex; align-items: center; gap: 2px; width: auto; margin: 0; }
-  .folha > .cabeca .btn { display: inline-grid; place-items: center; flex: 0 0 auto; width: 44px; height: 44px; min-height: 0; padding: 0;
+  .folha > .cabeca .btn { display: inline-grid; place-items: center; flex: 0 0 auto; width: var(--ic-topo); height: 44px; min-height: 0; padding: 0;
     background: none; border: 0; box-shadow: none; color: var(--grafite); border-radius: 0; }
   .folha > .cabeca .btn:active { background: rgba(22, 24, 29, .12); }
   .folha > .cabeca .btn:disabled { opacity: .35; }
   .folha > .cabeca .btn > .icone { display: block; }
   .folha > .cabeca .btn > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  /* Chamados: as abas (Fila, Agendados, Entregues) ficam na barra, em ícone; a aba ativa é o quadrado grafite. */
+  .ch-abas { display: none; }
+  .folha > .cabeca .ch-abas-topo { display: flex; align-items: center; gap: 0; margin-right: 4px; padding-right: 4px; border-right: 1px solid rgba(22, 24, 29, .28); }
+  .ch-abas-topo button { position: relative; display: inline-grid; place-items: center; width: var(--ic-topo); height: 40px; padding: 0; border: 0; background: none; color: var(--grafite); cursor: pointer; }
+  .ch-abas-topo button b { position: absolute; top: 1px; right: 0; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 8px; background: var(--grafite); color: #fff;
+    font: 700 .64rem/16px var(--fonte-texto); text-align: center; }
+  .ch-abas-topo button.on { background: var(--grafite); color: #fff; }
+  .ch-abas-topo button.on b { background: #fff; color: var(--grafite); }
+}
+@media (max-width: 350px) {
+  .casca { --ic-topo: 9.6vw; }
+  .topo-m span { font-size: 1rem; }
+}
+@media (max-width: 860px) {
   .ficha-resumo-m { display: grid; gap: 4px; margin-bottom: 18px; }
   .ficha-resumo-m h2 { font-size: 1.5rem; }
   .ficha-resumo-m p { color: var(--cinza); margin: 0; }
