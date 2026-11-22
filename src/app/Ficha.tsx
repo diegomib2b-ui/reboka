@@ -1,3 +1,4 @@
+import { Icone } from './icones';
 import { useEffect, useState, type FormEvent } from 'react';
 import { api, limparPlaca, type Cliente, type Atendimento, type Contato, type Servico, type Modelo, type Oportunidade, type Veiculo } from './api';
 import { ETAPAS } from './Funil';
@@ -73,10 +74,18 @@ export default function Ficha({ lojaId, clienteId, gestao }: { lojaId: string; c
           </div>
         </div>
         <div className="botoes">
-          <button type="button" className="btn btn-primario" onClick={() => setJanela('atendimento')}>Registrar atendimento</button>
-          <button type="button" className="btn btn-secundario" onClick={abrirWhats} disabled={p.nao_contatar}>Chamar no WhatsApp</button>
+          <button type="button" className="btn btn-primario" onClick={() => setJanela('atendimento')} title="Registrar atendimento"><Icone nome="somar" tamanho={22} /><span>Registrar atendimento</span></button>
+          <button type="button" className="btn btn-secundario" onClick={abrirWhats} disabled={p.nao_contatar} title="Chamar no WhatsApp"><Icone nome="mensagem" tamanho={22} /><span>Chamar no WhatsApp</span></button>
         </div>
       </header>
+      {/* No celular o cabeçalho vira a barra compacta; os dados do cliente descem para este bloco. */}
+      <div className="ficha-resumo-m">
+        <h2>{p.nome}</h2>
+        <p>{telefoneBR(p.telefone)}, {fraseOrigem(p.origem)}. Cadastrado em {dataBR(p.criado_em)}.</p>
+        {p.veiculo && <p className="carro">{p.veiculo}</p>}
+        {p.nao_contatar && <p><span className="chip chip-vencido">Não contatar</span></p>}
+        {p.observacao && <p className="obs">{p.observacao}</p>}
+      </div>
 
       <section className="bloco">
         <div className="bloco-topo">

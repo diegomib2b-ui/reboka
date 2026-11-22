@@ -146,21 +146,6 @@ export default function App() {
   }
   useEffect(() => { carregar(); }, []);
   useEffect(() => { window.scrollTo(0, 0); }, [rota]);
-  // Topo do celular: enquanto o título grande da tela está visível, a barra fica só na cor; quando ele rola para baixo
-  // da barra, o nome da tela aparece nela, menor (o mesmo comportamento do título grande do iPhone).
-  const [rolou, setRolou] = useState(false);
-  useEffect(() => {
-    const medir = () => {
-      const h = document.querySelector('.folha .cabeca h1, .folha .mais-titulo');
-      const barra = document.querySelector('.topo-m')?.getBoundingClientRect().bottom ?? 0;
-      setRolou(h ? h.getBoundingClientRect().bottom < barra + 4 : window.scrollY > 8);
-    };
-    medir();
-    const t = setTimeout(medir, 300);   // a tela pode terminar de montar depois da troca de rota
-    window.addEventListener('scroll', medir, { passive: true });
-    return () => { clearTimeout(t); window.removeEventListener('scroll', medir); };
-  }, [rota, estado]);
-
   async function sair() { if (MODO_DEMO) { location.replace('/'); return; } await sb.auth.signOut(); location.replace('/'); }
 
   if (erro) return <div className="centro"><Aviso>Não foi possível carregar o painel: {erro}</Aviso></div>;
@@ -205,7 +190,7 @@ export default function App() {
   return (
     <div className="casca">
       <PuxarAtualizar />
-      <div className={`topo-m${rolou ? ' rolou' : ''}`}><span aria-hidden={!rolou}>{base === 'mais' ? 'Mais' : base === 'importar' ? 'Importar clientes' : id && base === 'clientes' ? 'Cliente' : porRotaOpc(base)?.texto ?? (base === 'teste' ? 'Painel de teste' : 'Reboka')}</span></div>
+      <div className="topo-m"><span>{base === 'mais' ? 'Mais' : base === 'importar' ? 'Importar clientes' : id && base === 'clientes' ? 'Cliente' : porRotaOpc(base)?.texto ?? (base === 'teste' ? 'Painel de teste' : 'Reboka')}</span></div>
       {MODO_DEMO && <span className="demo-selo" role="status">Demonstração</span>}
       {loja.assinatura === 'teste' && (
         <div className="faixa" role="status">

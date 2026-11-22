@@ -1,3 +1,4 @@
+import { Icone } from './icones';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { api, type Loja, type Agendamento, type Servico, type Adicional } from './api';
 import { Janela, Campo, Aviso, SkCard } from './ui';
@@ -261,9 +262,9 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
       <header className="cabeca ch-cabeca">
         <h1>Chamados</h1>
         <div className="ch-topo-acoes">
-          {gestao && <button type="button" className="btn btn-secundario" onClick={() => setLinkAberto(true)}>Link de pedidos</button>}
-          {gestao && <button type="button" className="btn btn-secundario" onClick={() => setTarifas(true)}>Tabela de preço</button>}
-          <button type="button" className="btn btn-primario ch-novo-desk" onClick={() => setNovo(true)}>Novo chamado</button>
+          {gestao && <button type="button" className="btn btn-secundario" onClick={() => setLinkAberto(true)} title="Link de pedidos"><Icone nome="elo" tamanho={22} /><span>Link de pedidos</span></button>}
+          {gestao && <button type="button" className="btn btn-secundario" onClick={() => setTarifas(true)} title="Tabela de preço"><Icone nome="etiqueta" tamanho={22} /><span>Tabela de preço</span></button>}
+          <button type="button" className="btn btn-primario ch-novo-desk" onClick={() => setNovo(true)} title="Novo chamado"><Icone nome="somar" tamanho={22} /><span>Novo chamado</span></button>
         </div>
       </header>
 

@@ -1,3 +1,4 @@
+import { Icone } from './icones';
 import { useEffect, useState, type FormEvent } from 'react';
 import { api, limparPlaca, type Cliente, type Pessoa } from './api';
 import { Janela, Campo, Aviso, Vazio } from './ui';
@@ -93,15 +94,11 @@ export default function Clientes({ lojaId, gestao }: { lojaId: string; gestao: b
           <h1>Clientes</h1>
           <p>{lista ? `${lista.length} ${lista.length === 1 ? 'cliente' : 'clientes'}${busca ? ' na busca' : ''}` : 'Carregando'}</p>
         </div>
-        <div className="botoes cli-acoes-desk">
-          {gestao && <a className="btn btn-secundario" href="#/importar">Importar planilha</a>}
-          <button type="button" className="btn btn-primario" onClick={() => setNova(true)}>Novo cliente</button>
+        <div className="botoes">
+          {gestao && <a className="btn btn-secundario" href="#/importar" title="Importar planilha"><Icone nome="importar" tamanho={22} /><span>Importar planilha</span></a>}
+          <button type="button" className="btn btn-primario" onClick={() => setNova(true)} title="Novo cliente"><Icone nome="somar" tamanho={22} /><span>Novo cliente</span></button>
         </div>
-        <button type="button" className="cli-novo-mob" onClick={() => setNova(true)} aria-label="Novo cliente">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-        </button>
       </header>
-      {gestao && <a className="cli-importar-mob" href="#/importar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12M8 11l4 4 4-4M4 21h16" /></svg> Importar planilha</a>}
 
       <label className="campo busca cli-busca">
         <span>Buscar por nome, telefone, carro ou placa</span>
