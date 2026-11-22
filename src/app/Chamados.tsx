@@ -69,6 +69,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
   const [linkAberto, setLinkAberto] = useState(false);
   const [menu, setMenu] = useState(false);
   const [dia, setDia] = useState(() => zeroHora(new Date()));   // dia aberto na agenda
+  const [visao, setVisao] = useState<'dia' | 'semana'>('dia');  // no celular a agenda abre em um dia; a semana é opção
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
   const [, setTique] = useState(0);
   // No computador a fila fica à esquerda e o chamado escolhido abre ao lado; no celular ele abre em janela.
@@ -99,10 +100,11 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
   // Tudo que tem hora marcada vai para a agenda (inclusive o que já subiu para a fila por estar chegando).
   const marcados = vivos.filter((a) => faseDe(a.status) === 'agendado');
   const ehHoje = mesmoDia(dia, new Date());
-  // No celular a agenda é a tela: o dia (com a fila dentro) ou a semana. No computador ela é a aba Agenda, em semana.
-  const agendaDia = celular && aba === 'fila';
-  const agendaSemana = aba === 'agendados';
-  const painelLado = largo && !agendaSemana;
+  // A agenda só abre em Agendados. No celular ela mostra um dia (ou a semana, pelo seletor); no computador, a semana.
+  const agendaDia = celular && aba === 'agendados' && visao === 'dia';
+  const agendaSemana = aba === 'agendados' && !agendaDia;
+  const naAgenda = aba === 'agendados';
+  const painelLado = largo && !naAgenda;
   const daAba = aba === 'fila' ? fila : aba === 'agendados' ? agendados : entregues;
   const sel = vivos.find((a) => a.id === selId) ?? null;
   const alvo = painelLado ? sel ?? daAba[0] ?? null : sel;   // no computador, o primeiro da lista já aparece aberto
@@ -260,7 +262,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
   }
 
   const ABAS: { v: Aba; rot: string; n: number }[] = [
-    { v: 'fila', rot: 'Fila', n: fila.length }, { v: 'agendados', rot: 'Agenda', n: marcados.length }, { v: 'entregues', rot: 'Entregues', n: entregues.length },
+    { v: 'fila', rot: 'Fila', n: fila.length }, { v: 'agendados', rot: 'Agendados', n: marcados.length }, { v: 'entregues', rot: 'Entregues', n: entregues.length },
   ];
   const VAZIO: Record<Aba, string> = {
     fila: 'Nenhum chamado na fila. Quando um cliente pedir pelo link ou você abrir um chamado, ele aparece aqui.',
@@ -273,7 +275,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
       <header className="cabeca ch-cabeca">
         <h1>Chamados</h1>
         {/* Celular: o topo mostra o dia aberto na agenda; tocar abre o calendário do aparelho para pular de data. */}
-        {aba === 'entregues' ? <span className="ch-data">Entregues</span> : (
+        {!naAgenda ? <span className="ch-data">{aba === 'entregues' ? 'Entregues' : 'Chamados'}</span> : (
           <label className="ch-data">
             <Icone nome="agenda" tamanho={22} />
             <span>{tituloDia(dia).semana}, <b>{tituloDia(dia).resto}</b></span>
@@ -295,7 +297,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
             <span className="ch-rot">Ver</span>
             {ABAS.map((x) => (
               <button key={x.v} type="button" className={aba === x.v ? 'on' : ''} aria-current={aba === x.v ? 'true' : undefined} onClick={() => { setAba(x.v); setSelId(null); setMenu(false); }}>
-                <Icone nome={x.v === 'fila' ? 'servicos' : x.v === 'agendados' ? 'agenda' : 'selo'} tamanho={22} /><span>{x.v === 'fila' ? 'Dia e fila' : x.v === 'agendados' ? 'Semana' : x.rot}</span><b>{x.n}</b>
+                <Icone nome={x.v === 'fila' ? 'servicos' : x.v === 'agendados' ? 'agenda' : 'selo'} tamanho={22} /><span>{x.rot}</span><b>{x.n}</b>
               </button>
             ))}
             {gestao && <>
@@ -310,7 +312,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
       {erro && <Aviso>{erro}</Aviso>}
 
       <div className={`ch-tela${painelLado ? ' ch-largo' : ''}`}>
-        <div className={`ch-esq${agendaSemana ? ' ch-esq-larga' : ''}`}>
+        <div className={`ch-esq${naAgenda ? ' ch-esq-larga' : ''}`}>
           {aba === 'entregues' && <p className="ch-aba-atual"><b>{ABAS.find((x) => x.v === aba)?.rot}</b><button type="button" className="link" onClick={() => { setAba('fila'); setSelId(null); }}>Voltar para a fila</button></p>}
           <div className="ch-abas" role="tablist">
             {ABAS.map((x) => (
@@ -324,26 +326,21 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
               {!semanaDe(dia).some((d) => mesmoDia(d, new Date())) && <button type="button" className="btn btn-secundario" onClick={() => setDia(zeroHora(new Date()))}>Voltar para hoje</button>}
             </div>
           )}
-          {(agendaDia || agendaSemana) && <FaixaSemana dia={dia} itens={marcados} aoEscolher={setDia} />}
+          {naAgenda && <FaixaSemana dia={dia} itens={marcados} aoEscolher={setDia} />}
+          {naAgenda && celular && (
+            <div className="agc-barra">
+              {fila.length > 0 ? <button type="button" className="ch-fila-barra" onClick={() => { setAba('fila'); setSelId(null); }}><span><b>{fila.length}</b> na fila</span><span className="link">Ver a fila</span></button> : <span />}
+              <div className="agc-modo" role="group" aria-label="Visão">
+                <button type="button" aria-pressed={visao === 'dia'} onClick={() => setVisao('dia')}>Dia</button>
+                <button type="button" aria-pressed={visao === 'semana'} onClick={() => setVisao('semana')}>Semana</button>
+              </div>
+            </div>
+          )}
 
           {lista === null ? <SkCard /> : agendaSemana ? (
             <GradeHoras dias={semanaDe(dia)} itens={marcados} aoAbrir={abrir} />
           ) : agendaDia ? (
-            <>
-              {ehHoje ? (fila.length > 0 && (
-                <>
-                  <span className="ch-rot ch-secao">Agora</span>
-                  {agora(fila[0])}
-                  {fila.length > 1 && <><span className="ch-rot ch-secao">Em seguida</span><div className="ch-fila">{fila.slice(1).map((a) => linha(a, prioridade(a) === 0))}</div></>}
-                </>
-              )) : fila.length > 0 && (
-                <button type="button" className="ch-fila-barra" onClick={() => setDia(zeroHora(new Date()))}>
-                  <span><b>{fila.length}</b> {fila.length === 1 ? 'chamado na fila' : 'chamados na fila'}</span><span className="link">Ver a fila</span>
-                </button>
-              )}
-              <span className="ch-rot ch-secao">{ehHoje ? 'Agendado para hoje' : 'Agendado para este dia'}</span>
-              <GradeHoras dias={[dia]} itens={marcados} aoAbrir={abrir} />
-            </>
+            <GradeHoras dias={[dia]} itens={marcados} aoAbrir={abrir} />
           ) : daAba.length === 0 ? <p className="ch-nada">{VAZIO[aba]}</p> : aba === 'fila' ? (
             <>
               <span className="ch-rot ch-secao">Agora</span>
@@ -351,7 +348,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
               {fila.length > 1 && <><span className="ch-rot ch-secao">Em seguida</span><div className="ch-fila">{fila.slice(1).map((a) => linha(a, prioridade(a) === 0))}</div></>}
             </>
           ) : <div className="ch-fila">{daAba.map((a) => linha(a))}</div>}
-          {(agendaDia || agendaSemana) && !ehHoje && <button type="button" className="ch-hoje" onClick={() => setDia(zeroHora(new Date()))}>‹ Hoje</button>}
+          {naAgenda && !ehHoje && <button type="button" className="ch-hoje" onClick={() => setDia(zeroHora(new Date()))}>‹ Hoje</button>}
 
           <footer className="ch-resumo">
             <span>Hoje: <b>{entreguesHoje.length} {entreguesHoje.length === 1 ? 'entregue' : 'entregues'} · {brl(faturado)}</b></span>
