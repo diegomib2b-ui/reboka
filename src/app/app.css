@@ -1313,6 +1313,38 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
 .cabeca .btn > .icone { display: none; }
 .ficha-resumo-m { display: none; }
 .ch-menu-btn, .ch-menu-fundo, .ch-aba-atual { display: none; }
+.ch-data, .ch-hoje, .ch-fila-barra { display: none; }
+.ch-esq.ch-esq-larga { max-width: none; }
+
+/* === Agenda dos chamados com hora marcada: faixa da semana + grade de horas === */
+.agc-faixa { --agc-calha: 52px; display: grid; grid-template-columns: var(--agc-calha) repeat(7, minmax(0, 1fr)); align-items: end; background: #fff; border: 1px solid var(--borda); border-bottom: 0; padding: 10px 0 8px; }
+.agc-topo { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 40px; }
+.agc-topo b { font: 700 1.15rem var(--fonte-titulo); color: var(--grafite); }
+.agc-setas { display: flex; justify-content: center; gap: 2px; padding-bottom: 4px; }
+.agc-setas button { width: 22px; height: 30px; border: 0; background: none; font: 600 1.25rem/1 var(--fonte-titulo); color: var(--cinza); cursor: pointer; }
+.agc-setas button:hover { color: var(--grafite); }
+.agc-dia { display: grid; justify-items: center; gap: 4px; border: 0; background: none; padding: 0; cursor: pointer; }
+.agc-dia small { font: 500 .8rem var(--fonte-texto); color: #8D929B; }
+.agc-dia b { width: 34px; height: 34px; display: grid; place-items: center; font: 600 1.02rem var(--fonte-titulo); color: var(--grafite); }
+.agc-dia.hoje b { box-shadow: inset 0 -3px 0 var(--marca); }
+.agc-dia.on b { background: var(--grafite); color: #fff; box-shadow: none; }
+.agc-dia i { width: 6px; height: 6px; border-radius: 50%; background: var(--marca-escura); }
+.agc-dia i.z { background: transparent; }
+.agc-grade { --agc-calha: 52px; --agc-rh: 30px; display: grid; grid-template-columns: var(--agc-calha) repeat(var(--agc-col), minmax(0, 1fr)); background: #fff; border: 1px solid var(--borda); padding-top: 10px; }
+.agc-horas span { display: block; height: calc(var(--agc-rh) * 2); font: 500 .72rem var(--fonte-texto); color: #8D929B; text-align: center; transform: translateY(-8px); }
+.agc-col { position: relative; border-left: 1px solid #E6E8EC; background-image: linear-gradient(#E9EBEF 1px, transparent 1px); background-size: 100% calc(var(--agc-rh) * 2); }
+.agc-col.fds { background-color: #F7F8FA; }
+.agc-agora { position: absolute; left: 0; right: 0; height: 2px; background: var(--perigo, #C2410C); z-index: 1; pointer-events: none; }
+.agc-agora::before { content: ''; position: absolute; left: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: inherit; }
+.agc-bl { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; text-align: left; border: 0; border-left: 3px solid var(--grafite); background: #FFF1C2; padding: 4px 6px; overflow: hidden; cursor: pointer;
+  font: 600 .78rem/1.25 var(--fonte-texto); color: var(--grafite); overflow-wrap: anywhere; }
+.agc-bl:hover { background: #FFE89B; }
+.agc-bl time { display: block; font-weight: 700; font-size: .72rem; color: #5B4A12; }
+.agc-um .agc-bl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1px 10px; align-content: start; padding: 7px 12px; font: 700 1rem/1.25 var(--fonte-titulo); }
+.agc-um .agc-bl time { grid-column: 1 / -1; font-size: .78rem; font-family: var(--fonte-texto); }
+.agc-um .agc-bl span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agc-um .agc-bl.agc-curto p { display: none; }
+.agc-um .agc-bl p { grid-column: 1 / -1; font: 500 .84rem var(--fonte-texto); color: #5F6470; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 860px) {
   .casca { --ic-topo: min(44px, 10.4vw); }
   .topo-m { display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 6;
@@ -1348,6 +1380,20 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
   .ch-menu button b { min-width: 26px; text-align: center; padding: 2px 8px; background: var(--nevoa); font-weight: 700; font-size: .88rem; }
   .ch-menu button.on { background: var(--nevoa); box-shadow: inset 3px 0 0 var(--marca); }
   .ch-menu button.on b { background: var(--grafite); color: #fff; }
+  /* O topo de Chamados mostra o dia da agenda: a faixa do cabeçalho cobre a barra inteira. */
+  .folha > .cabeca.ch-cabeca { left: 0; right: 0; padding: 0 6px 0 16px; justify-content: space-between; background: var(--marca); }
+  .ch-data { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; font: 500 1.04rem var(--fonte-titulo); color: var(--grafite); white-space: nowrap; }
+  span.ch-data { font-weight: 700; font-size: 1.18rem; }
+  .ch-data b { font-weight: 700; }
+  .ch-data .icone { flex: none; }
+  .ch-data input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; cursor: pointer; }
+  .ch-tela:has(.agc-faixa) { margin-top: 0 !important; }
+  .agc-faixa { position: sticky; top: calc(52px + env(safe-area-inset-top)); z-index: 3; margin: 0 -16px 6px; border-width: 0 0 1px; --agc-calha: 46px; }
+  .agc-grade { --agc-rh: 38px; --agc-calha: 46px; margin: 0 -16px; border-width: 1px 0; }
+  .agc-grade:not(.agc-um) .agc-bl { font-size: .66rem; padding: 3px 3px 3px 4px; }
+  .agc-grade:not(.agc-um) .agc-bl time { font-size: .62rem; }
+  .ch-fila-barra { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 1px solid var(--borda); border-left: 3px solid var(--marca); background: #fff; font: 500 .95rem var(--fonte-texto); color: var(--grafite); cursor: pointer; text-align: left; }
+  .ch-hoje { display: block; position: fixed; left: 12px; bottom: calc(78px + env(safe-area-inset-bottom)); z-index: 4; background: #fff; border: 1px solid var(--borda); box-shadow: var(--sombra-flutua); padding: 9px 16px; font: 700 .92rem var(--fonte-texto); color: var(--grafite); cursor: pointer; }
   .ch-aba-atual { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
   .ch-aba-atual b { font: 700 1.25rem var(--fonte-titulo); color: var(--grafite); }
 }

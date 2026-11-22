@@ -26,6 +26,7 @@ const TRACOS: Record<string, string[]> = {
   mensagem: ['M4 5h16v11H9l-5 4z'],
   somar: ['M12 5v14', 'M5 12h14'],
   menu: ['M4 6.5h16', 'M4 12h16', 'M4 17.5h16'],
+  baixo: ['M6 9l6 6 6-6'],
   elo: ['M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1', 'M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'],
   etiqueta: ['M4 4h7.5l8.5 8.5-7.500 7.500L4 11.5z', 'M8.2 8.2h.01'],
   importar: ['M12 4v11', 'M8 11l4 4 4-4', 'M4 20h16'],
