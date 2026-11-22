@@ -18,7 +18,7 @@ async def main():
                     await pg.goto(f"http://localhost:4399/app/?demo=1{rota}"); await pg.wait_for_timeout(1800)
                     await pg.screenshot(path=f"docs/prints/{nome}-{tela}.png", full_page=(tela == "desktop"))
                 await pg.goto("http://localhost:4399/app/?demo=1#/chamados"); await pg.wait_for_timeout(1500)
-                await pg.click(".ch-novo-desk" if tela == "desktop" else ".ch-fab"); await pg.wait_for_timeout(400)
+                await pg.click(".ch-novo-desk"); await pg.wait_for_timeout(400)
                 await pg.fill("input[placeholder='Nome de quem chamou']", "Marina Prado")
                 await pg.fill("input[placeholder='(41) 99999-0000']", "41991112222")
                 await pg.fill("input[placeholder='Onix branco']", "Gol prata")

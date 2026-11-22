@@ -295,7 +295,6 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
         {largo && <aside className="ch-painel">{alvo ? detalhe(alvo, true) : <p className="ch-nada">Escolha um chamado para ver os detalhes.</p>}</aside>}
       </div>
 
-      <button type="button" className="ag-fab ch-fab" aria-label="Novo chamado" onClick={() => setNovo(true)}>+</button>
 
       <Janela titulo="Novo chamado" aberta={novo} aoFechar={() => setNovo(false)} larga>
         {novo && <FormChamado loja={loja} servicos={servicos} aoCancelar={() => setNovo(false)} aoSalvar={async () => { setNovo(false); setAba('fila'); await carregar(); }} />}
