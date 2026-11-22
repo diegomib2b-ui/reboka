@@ -1262,8 +1262,6 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
 .ch-pt-a { border: 2.5px solid var(--grafite); background: #fff; }
 .ch-pt-b { background: var(--marca); border: 2.5px solid var(--grafite); border-radius: 0; }
 .ch-rota::before { content: ''; position: absolute; left: 4.5px; top: 15px; bottom: 15px; border-left: 1.5px dashed var(--borda); }
-.ch-fab { display: none; color: var(--grafite); }
-.ch-fab:hover { background: var(--marca-hover); }
 
 .ch-form { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 22px; align-items: start; }
 .ch-form-col { min-width: 0; }
@@ -1291,12 +1289,10 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
 
 @media (max-width: 820px) {
   .ch-cabeca h1 { font-size: 1.6rem; }
-  .ch-novo-desk { display: none; }
   .ch-cabeca { gap: 10px; margin-bottom: 12px; }
   .ch-topo-acoes { width: 100%; flex-wrap: nowrap; gap: 8px; }
   .ch-topo-acoes .btn { width: auto; flex: 1 1 0; padding: 8px 10px; font-size: .86rem; min-height: 0; white-space: nowrap; }
-  .ch-fab { display: grid; }
-  .ch-esq { max-width: none; padding-bottom: 70px; }
+  .ch-esq { max-width: none; }
   .ch-agora h2 { font-size: 1.35rem; }
   .ch-linha { grid-template-columns: 58px minmax(0, 1fr) auto; gap: 10px; padding: 12px; }
   .ch-form { grid-template-columns: 1fr; gap: 14px; }
@@ -1316,7 +1312,9 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
    O cabeçalho grande de cada tela (título, descrição e botões com texto) fica só no computador. Vale para todas as telas. */
 .cabeca .btn > .icone { display: none; }
 .ficha-resumo-m { display: none; }
+.ch-menu-btn, .ch-menu-fundo, .ch-aba-atual { display: none; }
 @media (max-width: 860px) {
+  .casca { --ic-topo: min(44px, 10.4vw); }
   .topo-m { display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 6;
     box-sizing: border-box; height: calc(52px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 150px 0 16px; background: var(--marca);
     box-shadow: 0 1px 0 rgba(22, 24, 29, .14); }
@@ -1331,13 +1329,33 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
     display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 2px; width: auto; max-width: none; background: none; }
   .folha > .cabeca h1, .folha > .cabeca p, .folha > .cabeca .ficha-carro, .folha > .cabeca .obs { display: none; }
   .folha > .cabeca > div { display: flex; align-items: center; gap: 2px; width: auto; margin: 0; }
-  .folha > .cabeca .btn { display: inline-grid; place-items: center; flex: 0 0 auto; width: 44px; height: 44px; min-height: 0; padding: 0;
+  .folha > .cabeca .btn { display: inline-grid; place-items: center; flex: 0 0 auto; width: var(--ic-topo); height: 44px; min-height: 0; padding: 0;
     background: none; border: 0; box-shadow: none; color: var(--grafite); border-radius: 0; }
   .folha > .cabeca .btn:active { background: rgba(22, 24, 29, .12); }
   .folha > .cabeca .btn:disabled { opacity: .35; }
   .folha > .cabeca .btn > .icone { display: block; }
   .folha > .cabeca .btn > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .folha > .cabeca .ch-novo-desk { display: none; }
+  /* Chamados: no topo ficam só o hambúrguer e o "+". As listas (Fila, Agendados, Entregues) e as configurações abrem no menu. */
+  .ch-abas { display: none; }
+  .folha > .cabeca .ch-topo-acoes .btn-secundario { display: none; }
+  .ch-menu-btn { order: 2; display: inline-grid; place-items: center; width: var(--ic-topo); height: 44px; padding: 0; border: 0; background: none; color: var(--grafite); cursor: pointer; }
+  .ch-menu-btn[aria-expanded="true"] { background: var(--grafite); color: #fff; }
+  .ch-menu-fundo { display: block; position: fixed; inset: calc(52px + env(safe-area-inset-top)) 0 0 0; z-index: 8; background: rgba(22, 24, 29, .38); }
+  .ch-menu { position: absolute; top: 0; right: 0; width: min(300px, 86vw); background: #fff; border: 1px solid var(--borda); border-top: 0; box-shadow: var(--sombra-flutua); padding: 10px 0 8px; display: grid; }
+  .ch-menu .ch-rot { padding: 8px 18px 4px; }
+  .ch-menu button { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 14px; padding: 13px 18px; border: 0; background: none; text-align: left;
+    font: 600 1rem var(--fonte-texto); color: var(--grafite); cursor: pointer; }
+  .ch-menu button b { min-width: 26px; text-align: center; padding: 2px 8px; background: var(--nevoa); font-weight: 700; font-size: .88rem; }
+  .ch-menu button.on { background: var(--nevoa); box-shadow: inset 3px 0 0 var(--marca); }
+  .ch-menu button.on b { background: var(--grafite); color: #fff; }
+  .ch-aba-atual { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+  .ch-aba-atual b { font: 700 1.25rem var(--fonte-titulo); color: var(--grafite); }
+}
+@media (max-width: 350px) {
+  .casca { --ic-topo: 9.6vw; }
+  .topo-m span { font-size: 1rem; }
+}
+@media (max-width: 860px) {
   .ficha-resumo-m { display: grid; gap: 4px; margin-bottom: 18px; }
   .ficha-resumo-m h2 { font-size: 1.5rem; }
   .ficha-resumo-m p { color: var(--cinza); margin: 0; }

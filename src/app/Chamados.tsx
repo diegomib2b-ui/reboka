@@ -66,6 +66,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
   const [pix, setPix] = useState<Agendamento | null>(null);
   const [tarifas, setTarifas] = useState(false);
   const [linkAberto, setLinkAberto] = useState(false);
+  const [menu, setMenu] = useState(false);
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
   const [, setTique] = useState(0);
   // No computador a fila fica à esquerda e o chamado escolhido abre ao lado; no celular ele abre em janela.
@@ -264,14 +265,34 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
         <div className="ch-topo-acoes">
           {gestao && <button type="button" className="btn btn-secundario" onClick={() => setLinkAberto(true)} title="Link de pedidos"><Icone nome="elo" tamanho={22} /><span>Link de pedidos</span></button>}
           {gestao && <button type="button" className="btn btn-secundario" onClick={() => setTarifas(true)} title="Tabela de preço"><Icone nome="etiqueta" tamanho={22} /><span>Tabela de preço</span></button>}
+          <button type="button" className="ch-menu-btn" aria-label="Opções de Chamados" aria-expanded={menu} onClick={() => setMenu((v) => !v)}><Icone nome="menu" tamanho={24} /></button>
           <button type="button" className="btn btn-primario ch-novo-desk" onClick={() => setNovo(true)} title="Novo chamado"><Icone nome="somar" tamanho={22} /><span>Novo chamado</span></button>
         </div>
       </header>
+      {/* Celular: o hambúrguer do topo abre este menu com as listas e as opções da tela. */}
+      {menu && (
+        <div className="ch-menu-fundo" onClick={() => setMenu(false)}>
+          <nav className="ch-menu" aria-label="Opções de Chamados" onClick={(e) => e.stopPropagation()}>
+            <span className="ch-rot">Ver</span>
+            {ABAS.map((x) => (
+              <button key={x.v} type="button" className={aba === x.v ? 'on' : ''} aria-current={aba === x.v ? 'true' : undefined} onClick={() => { setAba(x.v); setSelId(null); setMenu(false); }}>
+                <Icone nome={x.v === 'fila' ? 'servicos' : x.v === 'agendados' ? 'agenda' : 'selo'} tamanho={22} /><span>{x.rot}</span><b>{x.n}</b>
+              </button>
+            ))}
+            {gestao && <>
+              <span className="ch-rot">Configurar</span>
+              <button type="button" onClick={() => { setMenu(false); setLinkAberto(true); }}><Icone nome="elo" tamanho={22} /><span>Link de pedidos</span></button>
+              <button type="button" onClick={() => { setMenu(false); setTarifas(true); }}><Icone nome="etiqueta" tamanho={22} /><span>Tabela de preço</span></button>
+            </>}
+          </nav>
+        </div>
+      )}
 
       {erro && <Aviso>{erro}</Aviso>}
 
       <div className={`ch-tela${largo ? ' ch-largo' : ''}`}>
         <div className="ch-esq">
+          {aba !== 'fila' && <p className="ch-aba-atual"><b>{ABAS.find((x) => x.v === aba)?.rot}</b><button type="button" className="link" onClick={() => { setAba('fila'); setSelId(null); }}>Voltar para a fila</button></p>}
           <div className="ch-abas" role="tablist">
             {ABAS.map((x) => (
               <button key={x.v} type="button" role="tab" aria-selected={aba === x.v} className={aba === x.v ? 'on' : ''} onClick={() => { setAba(x.v); setSelId(null); }}>{x.rot}<span>{x.n}</span></button>
@@ -295,7 +316,6 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
         {largo && <aside className="ch-painel">{alvo ? detalhe(alvo, true) : <p className="ch-nada">Escolha um chamado para ver os detalhes.</p>}</aside>}
       </div>
 
-      <button type="button" className="ag-fab ch-fab" aria-label="Novo chamado" onClick={() => setNovo(true)}>+</button>
 
       <Janela titulo="Novo chamado" aberta={novo} aoFechar={() => setNovo(false)} larga>
         {novo && <FormChamado loja={loja} servicos={servicos} aoCancelar={() => setNovo(false)} aoSalvar={async () => { setNovo(false); setAba('fila'); await carregar(); }} />}
