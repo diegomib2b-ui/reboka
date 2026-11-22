@@ -60,7 +60,8 @@ Agenda por horário, funil de orçamentos, reativação, contratos, fidelidade, 
 
 ## Pendências
 
-- **Banco:** as migrations ainda não foram aplicadas em nenhum projeto Supabase. `src/app/config.ts` e `wrangler.jsonc` ainda apontam para o Enter-Labs.
+- **Banco:** fica no projeto Supabase **Enter-Labs** (dividido com outros produtos, tabelas `reboka_`), com as migrations 0001 a 0024 aplicadas em 22/11/2026. Para sair para um banco próprio: criar o projeto, aplicar `supabase/migrations/` em ordem, copiar os dados e trocar `src/app/config.ts` e `wrangler.jsonc`.
+- **Publicação:** falta conectar o repositório a um Worker chamado `reboka` no Cloudflare (build `npm run build`, deploy `npx wrangler deploy`) e cadastrar os segredos `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` e `SUPABASE_SECRET_KEY`.
 - **Domínio:** `reboka.com.br` está nos textos, mas não foi verificado nem registrado.
 - **Identidade e preços:** cor âmbar, logo e preços (R$ 97 e R$ 197) são provisórios.
 - **Próximos blocos:** vistoria com fotos na coleta e na entrega, cálculo automático de km, Atendente IA que cota pelo WhatsApp, termos e privacidade com revisão jurídica.
