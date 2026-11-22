@@ -1,0 +1,129 @@
+/* Reboka — tokens da identidade (provisória): âmbar de giroflex sobre grafite e cinza claro. Botões em âmbar levam texto escuro.
+    Toda tela (landing, blog, ajuda, painel) usa só estes valores. */
+:root {
+  --grafite: #16181D;
+  --grafite-2: #23262E;
+  --marca: #FFC21A;
+  --marca-escura: #8A5A00; /* âmbar escuro: links e textos em destaque (o âmbar claro não tem contraste para texto) */
+  --marca-hover: #EDB008;
+  --farol: #FFD95C;
+  --marca-clara: #FFD23F;
+  --nevoa: #F1F2F4;
+  --moldura: #F6F7F8;
+  --papel: #FAFAFB;
+  --tinta: #14161A;
+  --cinza: #646A72;
+  --borda: #E2E4E8;
+  /* Tokens herdados do motor, nas cores do Reboka. */
+  --aqua: #FFD95C;
+  --aco: #3D4249;
+  --grad-primario: linear-gradient(135deg, #FFCB33, #EDB008);
+  --verde: #1E9E6A;
+  --ambar: #D98A00;
+
+  /* ALTERNATIVA SALVA — "Grafite neutro" (base cinza neutra, azul só no acento).
+     Para trocar no futuro, substitua as 6 superfícies acima por estas:
+     --nevoa: #EBEEF1;  --moldura: #F1F3F5;  --papel: #FFFFFF;
+     --tinta: #0C2430;   --cinza: #5B6872;    --borda: #E1E5E9;
+     (mantém o acento cobalto). Combina bem com eventos "achatados": cartão branco + barra/bolinha de status. */
+
+  --chip-vencido-fundo: #FFE9DD;
+  --chip-vencido-texto: #9A3D12;
+  --chip-atencao-fundo: #FBEFCF;
+  --chip-atencao-texto: #7A4E00;
+  --chip-ok-fundo: #DDF3E8;
+  --chip-ok-texto: #12694A;
+
+  /* Conceito quadrado: cartões, painéis, janelas, campos e botões sem arredondamento. Só ficam redondos os círculos (avatar, anel), as etiquetas em pílula e os balões de conversa. */
+  --raio-p: 0;
+  --raio-m: 0;
+  --raio-g: 0;
+  --sombra: 0 24px 60px -30px rgba(16, 28, 74, 0.35);
+  /* Sombra em camadas (estilo Airbnb): uma próxima e fina + uma distante e difusa. */
+  --sombra-card: 0 1px 2px rgba(16, 28, 74, .05), 0 6px 16px -8px rgba(16, 28, 74, .12);
+  --sombra-flutua: 0 2px 6px rgba(16, 28, 74, .07), 0 16px 34px -12px rgba(16, 28, 74, .20);
+
+  --fonte-titulo: "Sora", system-ui, sans-serif;
+  --fonte-texto: "Figtree", system-ui, sans-serif;
+  --largura: 1160px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+/* Escala do texto do site inteiro (landing, blog, ajuda e painel). Todos os tamanhos são em rem,
+   então mudar este número aumenta ou diminui tudo de uma vez. 93.75% = base de 15px. */
+html { font-size: 93.75%; scroll-padding-top: 96px; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  font-size: 1.0667rem; /* 16px */
+  line-height: 1.55;
+}
+h1, h2, h3, h4 { font-family: var(--fonte-titulo); font-weight: 600; letter-spacing: -0.03em; line-height: 1.12; margin: 0; }
+h1 { font-size: clamp(2.3rem, 5.2vw, 4rem); }
+h2 { font-size: clamp(1.75rem, 3.4vw, 2.6rem); }
+h3 { font-size: 1.3rem; letter-spacing: -0.02em; }
+p { margin: 0; }
+a { color: inherit; }
+img, svg { max-width: 100%; }
+:focus-visible { outline: 3px solid var(--marca); outline-offset: 3px; border-radius: 0; }
+
+.container { width: min(var(--largura), 100% - 40px); margin-inline: auto; }
+.secao { padding-block: clamp(64px, 9vw, 112px); }
+.secao-nevoa { background: var(--nevoa); }
+.secao-escura { background: var(--grafite); color: #fff; }
+.lead { font-size: 1.2rem; color: var(--cinza); max-width: 62ch; margin-top: 14px; }
+.secao-escura .lead { color: #E4E6EB; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  font: 600 1rem var(--fonte-texto);
+  padding: 14px 22px; border-radius: 0; border: 1.5px solid transparent;
+  text-decoration: none; cursor: pointer; transition: background .15s, border-color .15s;
+}
+.btn-primario { background: var(--marca); color: var(--tinta); }
+.btn-primario:hover { background: var(--marca-hover); }
+.btn-secundario { background: #fff; color: var(--grafite); border-color: #D3D6DB; }
+.btn-secundario:hover { border-color: var(--marca); }
+.btn-fantasma { color: #fff; border-color: rgba(255,255,255,.35); }
+.btn-fantasma:hover { border-color: #fff; }
+/* Botão tonal: fundo da cor com baixa opacidade + texto na cor cheia.
+   Reduz o peso visual quando há várias ações na tela (padrão Airbnb/Abacate). */
+.btn-tonal { background: var(--nevoa); color: var(--marca-escura); border-color: transparent; padding: 9px 15px; border-radius: 0; font-size: .9rem; }
+.btn-tonal:hover { background: #D4F0F9; }
+.btn-tonal.t-em_servico { background: #FBEEDA; color: #B06E00; }
+.btn-tonal.t-em_servico:hover { background: #F6E3C4; }
+.btn-tonal.t-pronto { background: #E1F5EC; color: #15885A; }
+.btn-tonal.t-pronto:hover { background: #D2EEDF; }
+/* WhatsApp: ação que gera receita, mantém preenchimento (verde) para destaque. */
+.btn-wpp { background: #1FA463; color: #fff; }
+.btn-wpp:hover { background: #18894F; }
+
+.chip { display: inline-block; padding: 6px 14px; border-radius: 99px; font-weight: 600; font-size: .9rem; white-space: nowrap; }
+.chip-vencido { background: var(--chip-vencido-fundo); color: var(--chip-vencido-texto); }
+.chip-atencao { background: var(--chip-atencao-fundo); color: var(--chip-atencao-texto); }
+.chip-ok { background: var(--chip-ok-fundo); color: var(--chip-ok-texto); }
+
+.cartao { background: #fff; border-radius: var(--raio-g); box-shadow: var(--sombra); }
+
+/* texto longo: termos, blog, ajuda */
+.prosa { max-width: 70ch; }
+.prosa h1 { font-size: clamp(2rem, 4vw, 2.8rem); margin-bottom: 12px; }
+.prosa h2 { font-size: 1.5rem; margin: 44px 0 12px; }
+.prosa h3 { font-size: 1.15rem; margin: 28px 0 8px; }
+.prosa p, .prosa ul, .prosa ol { margin: 0 0 16px; }
+.prosa li { margin-bottom: 6px; }
+.prosa a { color: var(--marca-escura); }
+.prosa blockquote { margin: 0 0 16px; padding: 14px 18px; background: var(--nevoa); border-radius: var(--raio-p); }
+.prosa table { border-collapse: collapse; width: 100%; margin-bottom: 16px; font-size: .95rem; }
+.prosa th, .prosa td { text-align: left; padding: 10px 12px; border-bottom: 1.5px solid var(--nevoa); vertical-align: top; }
+.meta { color: var(--cinza); font-size: .95rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation: none !important; transition: none !important; }
+}
+
+/* No iPhone, campo com letra menor que 16px faz a tela dar zoom ao tocar. */
+@media (max-width: 860px) { input, select, textarea { font-size: 16px !important; } }

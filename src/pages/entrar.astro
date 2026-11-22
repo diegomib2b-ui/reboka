@@ -1,0 +1,10 @@
+---
+import Base from '../layouts/Base.astro';
+import '../app/app.css';
+import Auth from '../app/Auth';
+---
+<Base titulo="Entrar | Reboka">
+  <section class="auth-pagina">
+    <Auth modo="entrar" client:only="react" />
+  </section>
+</Base>

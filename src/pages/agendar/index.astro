@@ -1,0 +1,24 @@
+---
+// Página pública de agendamento. Montada no navegador (client:only) e lê ?l=<slug> da loja.
+import '@fontsource/sora/700.css';
+import '@fontsource/figtree/400.css';
+import '@fontsource/figtree/500.css';
+import '@fontsource/figtree/600.css';
+import '../../styles/global.css';
+import '../../app/agendar.css';
+import Agendar from '../../app/Agendar';
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Agendar serviço | Reboka</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#F9FEFF" />
+  </head>
+  <body>
+    <Agendar client:only="react" />
+  </body>
+</html>

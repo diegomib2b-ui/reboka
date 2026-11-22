@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Sem conexão | Reboka</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: #FAFAFB;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #14161A; padding: 24px; }
+  .caixa { text-align: center; max-width: 320px; }
+  .ico { width: 72px; height: 72px; margin: 0 auto 18px; display: block; }
+  h1 { font-size: 1.25rem; margin: 0 0 8px; }
+  p { color: #646A72; line-height: 1.5; margin: 0 0 20px; }
+  button { font: 600 .95rem system-ui; color: #14161A; background: #FFC21A; border: 0;
+    border-radius: 0; padding: 12px 20px; cursor: pointer; }
+</style>
+</head>
+<body>
+  <div class="caixa">
+    <img class="ico" src="/icon-192.png" alt="Reboka" />
+    <h1>Você está sem conexão</h1>
+    <p>Reconecte à internet para voltar ao painel. Seus dados estão seguros.</p>
+    <button onclick="location.reload()">Tentar de novo</button>
+  </div>
+</body>
+</html>

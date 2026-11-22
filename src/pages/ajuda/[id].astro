@@ -1,0 +1,12 @@
+---
+import Documento from '../../layouts/Documento.astro';
+import { getCollection, render } from 'astro:content';
+export async function getStaticPaths() {
+  return (await getCollection('ajuda')).map((artigo) => ({ params: { id: artigo.id }, props: { artigo } }));
+}
+const { artigo } = Astro.props;
+const { Content } = await render(artigo);
+---
+<Documento titulo={artigo.data.titulo} descricao={artigo.data.descricao} voltar={{ href: '/ajuda/', texto: 'Voltar para a central de ajuda' }}>
+  <Content />
+</Documento>

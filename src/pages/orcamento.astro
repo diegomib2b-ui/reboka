@@ -1,0 +1,184 @@
+---
+// Página que o cliente da oficina abre pelo link do WhatsApp para ver e aprovar o orçamento.
+// É estática: o conteúdo vem do banco pelo token do link (?t=...), sem login.
+// Não leva o menu do site: quem aparece aqui é a oficina, não o Reboka.
+import '@fontsource/sora/600.css';
+import '@fontsource/sora/700.css';
+import '@fontsource/figtree/400.css';
+import '@fontsource/figtree/500.css';
+import '@fontsource/figtree/600.css';
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Orçamento</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0A0A0A" />
+  </head>
+  <body>
+    <main class="orc">
+      <div id="orc" aria-live="polite"><p class="carregando">Carregando o orçamento</p></div>
+      <p class="feito">Enviado com <a href="/" aria-label="Reboka"><Logo tamanho={20} /></a></p>
+    </main>
+
+    <script>
+      import { SUPABASE_URL, SUPABASE_KEY } from '../app/config';
+
+      type Item = { id: string; tipo: 'peca' | 'servico'; descricao: string; quantidade: number; valor_unitario: number; aprovado: boolean | null };
+      type Orc = { status: 'enviado' | 'aprovado' | 'recusado'; oficina: string; cliente: string; carro: string | null; placa: string | null;
+        observacao: string | null; validade: string | null; vencido: boolean; respondido_em: string | null; itens: Item[] };
+
+      const raiz = document.getElementById('orc')!;
+      const q = new URLSearchParams(location.search);
+      const token = q.get('t') ?? '';
+      const previa = q.has('previa');   // a oficina olhando como o cliente vê: não conta como "aberto" e não deixa responder
+      const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      const dataBR = (iso: string) => new Date(iso.length === 10 ? iso + 'T12:00:00' : iso).toLocaleDateString('pt-BR');
+      // Tudo que vem do banco passa por aqui antes de entrar na página, para texto nunca virar código.
+      const esc = (t: unknown) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+
+      async function rpc<T>(nome: string, corpo: unknown): Promise<T> {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${nome}`, {
+          // Só a chave pública, sem login: o banco trata a chamada como visitante.
+          method: 'POST', headers: { apikey: SUPABASE_KEY, 'content-type': 'application/json' }, body: JSON.stringify(corpo),
+        });
+        const j = await r.json().catch(() => null);
+        // P0001 é um aviso escrito por nós no banco (orçamento vencido, por exemplo); o resto é falha técnica e não vai para a tela.
+        if (!r.ok) throw new Error(j?.code === 'P0001' ? j.message : 'Não foi possível abrir agora. Tente de novo em instantes.');
+        return j as T;
+      }
+
+      const sub = (i: Item) => Number(i.quantidade) * Number(i.valor_unitario);
+      const cabeca = (o: Orc) => `
+        <header class="topo">
+          <p class="oficina">${esc(o.oficina)}</p>
+          <h1>Orçamento${o.carro ? ` do ${esc(o.carro)}` : ''}</h1>
+          <p class="para">Para ${esc(o.cliente)}${o.placa ? ` <span class="placa">${esc(o.placa)}</span>` : ''}</p>
+        </header>`;
+      const linha = (i: Item, marcavel: boolean) => `
+        <li class="${i.aprovado === false ? 'fora' : ''}">
+          ${marcavel ? `<input type="checkbox" id="i-${i.id}" value="${i.id}" checked ${previa ? 'disabled' : ''}>` : ''}
+          <label ${marcavel ? `for="i-${i.id}"` : ''}>
+            <span class="desc">${esc(i.descricao)}</span>
+            <span class="det">${i.tipo === 'peca' ? 'Peça' : 'Mão de obra'}${Number(i.quantidade) !== 1 ? `, ${Number(i.quantidade).toLocaleString('pt-BR')} × ${brl(Number(i.valor_unitario))}` : ''}${i.aprovado === false ? ', ficou para depois' : ''}</span>
+          </label>
+          <b>${brl(sub(i))}</b>
+        </li>`;
+
+      function mostrar(o: Orc | null) {
+        if (!o) { raiz.innerHTML = `<div class="cartao"><h1>Orçamento não encontrado</h1><p>O link pode estar incompleto. Peça para a oficina enviar de novo.</p></div>`; return; }
+        document.title = `Orçamento, ${o.oficina}`;
+        const total = o.itens.reduce((s, i) => s + sub(i), 0);
+
+        if (o.status === 'aprovado') {
+          const aprovado = o.itens.filter((i) => i.aprovado).reduce((s, i) => s + sub(i), 0);
+          raiz.innerHTML = `${cabeca(o)}
+            <div class="cartao"><p class="selo ok">Aprovado${o.respondido_em ? ` em ${dataBR(o.respondido_em)}` : ''}</p>
+              <ul class="itens">${o.itens.map((i) => linha(i, false)).join('')}</ul>
+              <p class="total"><span>Total aprovado</span><b>${brl(aprovado)}</b></p>
+            </div>
+            <p class="nota">A ${esc(o.oficina)} já recebeu sua resposta e vai falar com você para combinar o horário.</p>`;
+          return;
+        }
+        if (o.status === 'recusado') {
+          raiz.innerHTML = `${cabeca(o)}<div class="cartao"><p class="selo">Você respondeu "agora não"</p>
+            <ul class="itens">${o.itens.map((i) => linha({ ...i, aprovado: null }, false)).join('')}</ul>
+            <p class="total"><span>Total</span><b>${brl(total)}</b></p></div>
+            <p class="nota">Mudou de ideia? Fale com a ${esc(o.oficina)} que eles reenviam o orçamento.</p>`;
+          return;
+        }
+
+        raiz.innerHTML = `${cabeca(o)}
+          ${previa ? '<p class="selo previa">Prévia: é assim que o cliente vê. Os botões ficam desligados.</p>' : ''}
+          <form class="cartao" id="form">
+            <p class="guia">${o.itens.length > 1 ? 'Desmarque o que preferir deixar para depois.' : 'Confira o item e aprove.'}</p>
+            <ul class="itens">${o.itens.map((i) => linha(i, o.itens.length > 1)).join('')}</ul>
+            <p class="total"><span id="rotulo-total">Total</span><b id="total">${brl(total)}</b></p>
+            ${o.observacao ? `<p class="obs">${esc(o.observacao)}</p>` : ''}
+            ${o.validade ? `<p class="validade ${o.vencido ? 'vencido' : ''}">${o.vencido ? `Este orçamento venceu em ${dataBR(o.validade)}. Peça um novo para a oficina.` : `Válido até ${dataBR(o.validade)}.`}</p>` : ''}
+            <p class="erro" id="erro" role="alert" hidden></p>
+            <div class="acoes">
+              <button class="btn btn-primario" id="aprovar" ${o.vencido || previa ? 'disabled' : ''}>Aprovar orçamento</button>
+              <button type="button" class="btn btn-secundario" id="recusar" ${o.vencido || previa ? 'disabled' : ''}>Agora não</button>
+            </div>
+          </form>`;
+
+        const form = document.getElementById('form') as HTMLFormElement;
+        const caixas = [...form.querySelectorAll<HTMLInputElement>('input[type=checkbox]')];
+        const aprovar = document.getElementById('aprovar') as HTMLButtonElement;
+        const recusar = document.getElementById('recusar') as HTMLButtonElement;
+        const erro = document.getElementById('erro')!;
+        function recalcular() {
+          if (!caixas.length) return;
+          const marcados = caixas.filter((c) => c.checked).map((c) => c.value);
+          const parcial = marcados.length < caixas.length;
+          document.getElementById('total')!.textContent = brl(o!.itens.filter((i) => marcados.includes(i.id)).reduce((s, i) => s + sub(i), 0));
+          document.getElementById('rotulo-total')!.textContent = parcial ? `Total de ${marcados.length} de ${caixas.length} itens` : 'Total';
+          aprovar.textContent = parcial && marcados.length ? `Aprovar ${marcados.length} ${marcados.length === 1 ? 'item' : 'itens'}` : 'Aprovar orçamento';
+          aprovar.disabled = marcados.length === 0 || o!.vencido || previa;
+          caixas.forEach((c) => c.closest('li')!.classList.toggle('fora', !c.checked));
+        }
+        caixas.forEach((c) => c.addEventListener('change', recalcular));
+
+        async function responder(sim: boolean) {
+          aprovar.disabled = recusar.disabled = true; erro.hidden = true;
+          try {
+            const escolhidos = sim && caixas.length ? caixas.filter((c) => c.checked).map((c) => c.value) : null;
+            mostrar(await rpc<Orc>('reboka_orcamento_responder', { t: token, aprovar: sim, escolhidos }));
+            scrollTo({ top: 0 });
+          } catch (e) { erro.textContent = (e as Error).message; erro.hidden = false; recusar.disabled = false; recalcular(); if (!caixas.length) aprovar.disabled = false; }
+        }
+        form.addEventListener('submit', (e) => { e.preventDefault(); responder(true); });
+        recusar.addEventListener('click', () => responder(false));
+      }
+
+      if (!token) mostrar(null);
+      else rpc<Orc | null>('reboka_orcamento_publico', { t: token, marcar: !previa }).then(mostrar)
+        .catch((e) => { raiz.innerHTML = `<div class="cartao"><h1>Não deu para abrir</h1><p>${esc((e as Error).message)}</p></div>`; });
+    </script>
+
+    <style is:global>
+      body { background: var(--nevoa); }
+      .orc { max-width: 560px; margin: 0 auto; padding: 28px 16px 40px; min-height: 100dvh; display: flex; flex-direction: column; }
+      #orc { flex: 1; }
+      .orc .carregando { color: var(--cinza); text-align: center; padding: 60px 0; }
+      .orc .topo { padding: 4px 6px 18px; }
+      .orc .oficina { font: 600 .82rem var(--fonte-texto); letter-spacing: .08em; text-transform: uppercase; color: var(--marca-escura); margin-bottom: 8px; }
+      .orc h1 { font-size: clamp(1.6rem, 6vw, 2rem); letter-spacing: -0.03em; line-height: 1.1; }
+      .orc .para { color: var(--cinza); margin-top: 6px; }
+      .orc .placa { display: inline-block; font: 600 .78rem var(--fonte-texto); letter-spacing: .06em; color: var(--cinza); border: 1.5px solid var(--borda); border-radius: 6px; padding: 1px 6px; margin-left: 6px; background: #fff; }
+      .orc .cartao { background: #fff; border: 1.5px solid var(--borda); border-radius: 0; padding: 20px; box-shadow: 0 18px 40px -30px rgba(0, 0, 0, .35); }
+      .orc .cartao h1 { font-size: 1.4rem; margin-bottom: 8px; }
+      .orc .guia { color: var(--cinza); font-size: .95rem; margin-bottom: 6px; }
+      .orc .itens { list-style: none; padding: 0; margin: 0; }
+      .orc .itens li { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 14px 0; border-bottom: 1.5px solid var(--nevoa); }
+      .orc .itens li > label:first-child { grid-column: 1 / 3; }
+      .orc .itens input { width: 22px; height: 22px; accent-color: var(--marca-hover); }
+      .orc .itens label { display: grid; gap: 2px; min-width: 0; cursor: pointer; }
+      .orc .itens .desc { font-weight: 600; color: var(--tinta); overflow-wrap: anywhere; }
+      .orc .itens .det { font-size: .86rem; color: var(--cinza); }
+      .orc .itens b { font: 600 1rem var(--fonte-titulo); white-space: nowrap; }
+      .orc .itens .fora .desc, .orc .itens .fora b { color: var(--cinza); text-decoration: line-through; font-weight: 500; }
+      .orc .total { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 16px; }
+      .orc .total span { color: var(--cinza); }
+      .orc .total b { font: 700 1.7rem var(--fonte-titulo); letter-spacing: -0.03em; }
+      .orc .obs { background: var(--papel); border-radius: 0; padding: 10px 12px; margin-top: 14px; font-size: .95rem; color: #3D4249; }
+      .orc .validade { font-size: .88rem; color: var(--cinza); margin-top: 10px; }
+      .orc .validade.vencido, .orc .erro { color: #A3261D; background: #FDF0EE; border-radius: 0; padding: 10px 12px; font-size: .95rem; margin-top: 12px; }
+      .orc .acoes { display: grid; gap: 10px; margin-top: 18px; }
+      .orc .acoes .btn { width: 100%; justify-content: center; text-align: center; padding: 15px 18px; font-size: 1.02rem; }
+      .orc .btn[disabled] { opacity: .5; cursor: not-allowed; }
+      .orc .selo { display: inline-block; font: 600 .86rem var(--fonte-texto); border-radius: 99px; padding: 6px 12px; background: var(--nevoa); color: #3D4249; margin-bottom: 6px; }
+      .orc .selo.ok { background: #FFF4D1; color: var(--marca-escura); }
+      .orc .selo.previa { display: block; border-radius: 0; margin: 0 0 12px; background: #FFF4D6; color: #6B4E00; font-weight: 500; }
+      .orc .nota { color: #3D4249; padding: 16px 6px 0; }
+      .orc .feito { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--cinza); font-size: .84rem; padding-top: 28px; }
+      .orc .feito a { display: inline-flex; }
+    </style>
+  </body>
+</html>

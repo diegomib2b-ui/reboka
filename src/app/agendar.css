@@ -1,0 +1,47 @@
+/* Página pública de agendamento */
+body { background: var(--moldura); }
+.ag-pagina { max-width: 560px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; }
+.ag-topo { display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1.5px solid var(--borda); }
+.ag-topo span { font: 600 1rem var(--fonte-texto); color: var(--grafite); }
+.ag-main { flex: 1; padding: 24px 20px 40px; }
+.ag-main h1 { font: 700 clamp(1.5rem, 5vw, 1.9rem) var(--fonte-titulo); color: var(--tinta); }
+.ag-sub { color: var(--cinza); margin-top: 6px; }
+.ag-bloco { margin-top: 26px; }
+.ag-bloco h2 { font: 600 .8rem var(--fonte-texto); text-transform: uppercase; letter-spacing: .06em; color: var(--cinza); margin-bottom: 12px; }
+.ag-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ag-chips button { font: 500 .95rem var(--fonte-texto); color: #2C4A55; background: #fff; border: 1.5px solid var(--borda); border-radius: 0; padding: 10px 16px; cursor: pointer; }
+.ag-chips button.on { background: var(--nevoa); border-color: var(--marca); color: var(--grafite); font-weight: 600; }
+.ag-dias { display: grid; grid-auto-flow: column; grid-auto-columns: 58px; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+.ag-dias button { display: grid; justify-items: center; gap: 2px; padding: 10px 0; background: #fff; border: 1.5px solid var(--borda); border-radius: 0; cursor: pointer; }
+.ag-dias button small { font-size: .72rem; color: var(--cinza); text-transform: uppercase; }
+.ag-dias button b { font: 700 1.2rem var(--fonte-titulo); color: var(--tinta); }
+.ag-dias button.on { background: var(--marca); border-color: var(--marca); }
+.ag-dias button.on small { color: #DDF3FB; }
+.ag-dias button.on b { color: #fff; }
+.ag-horas { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+.ag-horas button { font: 600 .95rem var(--fonte-texto); color: var(--grafite); background: #fff; border: 1.5px solid var(--borda); border-radius: 0; padding: 11px 0; cursor: pointer; }
+.ag-horas button:disabled { opacity: .35; cursor: not-allowed; text-decoration: line-through; }
+.ag-horas button.on { background: var(--marca); border-color: var(--marca); color: #fff; }
+.ag-campo { display: grid; gap: 6px; margin-bottom: 14px; font-weight: 600; font-size: .9rem; color: var(--tinta); }
+.ag-campo input { font: 500 1rem var(--fonte-texto); color: var(--tinta); padding: 13px 14px; border-radius: 0; border: 1.5px solid var(--borda); background: #fff; }
+.ag-campo input:focus-visible { outline: 3px solid var(--marca); outline-offset: 1px; border-color: var(--marca); }
+.ag-confirmar { width: 100%; margin-top: 8px; font: 600 1.05rem var(--fonte-texto); color: #fff; background: var(--marca); border: 0; border-radius: 0; padding: 15px; cursor: pointer; }
+.ag-confirmar:disabled { opacity: .6; }
+.ag-erro { color: var(--chip-vencido-texto); background: var(--chip-vencido-fundo); border-radius: 0; padding: 10px 14px; margin: 12px 0; font-size: .92rem; }
+.ag-rodape { text-align: center; color: var(--cinza); font-size: .85rem; padding: 18px; border-top: 1.5px solid var(--borda); }
+.ag-centro { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
+.ag-aviso, .ag-ok { text-align: center; max-width: 360px; }
+.ag-aviso h1, .ag-ok h1 { font: 700 1.5rem var(--fonte-titulo); color: var(--tinta); margin-bottom: 8px; }
+.ag-aviso p, .ag-ok p { color: var(--cinza); margin-top: 6px; }
+.ag-ok p b { color: var(--tinta); }
+.ag-check { width: 64px; height: 64px; margin: 0 auto 18px; border-radius: 50%; background: var(--chip-ok-fundo); color: var(--chip-ok-texto); display: grid; place-items: center; font-size: 2rem; }
+
+/* Avaliação (público) */
+.av-main h1 { margin-bottom: 4px; }
+.av-estrelas { display: flex; gap: 8px; margin-top: 18px; }
+.av-estrelas.av-grande { justify-content: center; gap: 12px; margin: 24px 0 6px; }
+.av-estrelas button, .av-estrelas span { background: none; border: 0; cursor: pointer; font-size: 2.4rem; line-height: 1; color: var(--borda); padding: 0; transition: transform .08s; }
+.av-estrelas button:hover { transform: scale(1.12); }
+.av-estrelas .on { color: #F5B800; }
+.av-texto { width: 100%; font: 500 1rem var(--fonte-texto); color: var(--tinta); padding: 13px 14px; border-radius: 0; border: 1.5px solid var(--borda); background: #fff; resize: vertical; line-height: 1.45; }
+.av-texto:focus-visible { outline: 3px solid var(--marca); outline-offset: 1px; border-color: var(--marca); }

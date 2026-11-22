@@ -1,0 +1,20 @@
+---
+// Layout de texto longo. Serve para páginas .md (termos, privacidade) e para a ajuda.
+import Base from './Base.astro';
+const fm = Astro.props.frontmatter ?? Astro.props;
+const { titulo, descricao, atualizado, voltar } = fm;
+---
+<Base titulo={`${titulo} | Reboka`} descricao={descricao}>
+  <article class="container secao prosa-pagina">
+    <div class="prosa">
+      {voltar && <p class="meta"><a href={voltar.href}>{voltar.texto}</a></p>}
+      <h1>{titulo}</h1>
+      {atualizado && <p class="meta">Atualizado em {atualizado}</p>}
+      <slot />
+    </div>
+  </article>
+</Base>
+<style>
+  .prosa-pagina { padding-top: 56px; }
+  .meta { margin-bottom: 18px; }
+</style>

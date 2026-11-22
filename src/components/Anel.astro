@@ -1,0 +1,13 @@
+---
+// Anel de ciclo: enche conforme o ciclo do serviço passa. Vencido = ponto pêssego no topo.
+interface Props { pct: number; cor?: string; tamanho?: number; vencido?: boolean; rotulo: string }
+const { pct, cor = 'var(--marca)', tamanho = 56, vencido = false, rotulo } = Astro.props;
+const c = 2 * Math.PI * 24;
+const cheio = Math.max(0, Math.min(1, pct)) * c;
+---
+<svg width={tamanho} height={tamanho} viewBox="0 0 64 64" role="img" aria-label={rotulo}>
+  <circle cx="32" cy="32" r="24" fill="none" stroke="var(--nevoa)" stroke-width="9" />
+  <circle cx="32" cy="32" r="24" fill="none" stroke={cor} stroke-width="9" stroke-linecap="round"
+    stroke-dasharray={`${cheio} ${c}`} transform="rotate(-90 32 32)" />
+  {vencido && <circle cx="32" cy="8" r="6.5" fill="var(--farol)" stroke="#fff" stroke-width="2.5" />}
+</svg>

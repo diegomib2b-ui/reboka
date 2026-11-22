@@ -1,0 +1,18 @@
+---
+// Marca: reboka. O nome é a própria logo; o k fica sobre uma placa âmbar.
+// As letras são contorno vetorial (geradas por scripts/gera_logo.py), então não dependem de fonte carregada.
+// Fundo claro: letras pretas. Fundo escuro: passe cor="#fff". O k sobre a placa é sempre escuro.
+import logo from '../data/logo.json';
+interface Props { tamanho?: number; cor?: string; realce?: string }
+const { tamanho = 34, cor = '#0A0A0A', realce = 'var(--marca)' } = Astro.props;
+const altura = tamanho * 0.84;
+---
+<svg class="logo" role="img" aria-label="Reboka" height={altura} width={altura * logo.razao} viewBox={logo.vb}>
+  <path fill={realce} d={logo.colchetes} />
+  <path fill={cor} d={`${logo.letras} ${logo.s}`} />
+  <path fill="#14161A" d={logo.k} />
+</svg>
+<style>
+  .logo { display: block; flex-shrink: 0; max-width: none; }
+  @media (max-width: 420px) { .logo { zoom: .9; } }
+</style>

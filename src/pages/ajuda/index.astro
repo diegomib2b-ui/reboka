@@ -1,0 +1,63 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { empresa } from '../../data/site';
+const artigos = (await getCollection('ajuda')).sort((a, b) => a.data.ordem - b.data.ordem);
+const categorias = [...new Set(artigos.map((a) => a.data.categoria))];
+---
+<Base titulo="Central de ajuda | Reboka" descricao="Como usar o Reboka: primeiros passos, importação, ciclos, WhatsApp, planos e segurança.">
+  <section class="container secao">
+    <h1>Central de ajuda</h1>
+    <p class="lead">Respostas diretas para começar a usar e resolver dúvidas do dia a dia.</p>
+    <label class="busca">
+      <span>Buscar um assunto</span>
+      <input type="search" id="busca" placeholder="Exemplo: importar planilha" autocomplete="off" />
+    </label>
+    <p id="vazio" class="meta" hidden>Nenhum artigo com esse termo. Escreva para {empresa.email} que a gente responde.</p>
+    {categorias.map((c) => (
+      <div class="grupo">
+        <h2>{c}</h2>
+        <div class="artigos">
+          {artigos.filter((a) => a.data.categoria === c).map((a) => (
+            <a class="artigo" href={`/ajuda/${a.id}/`} data-texto={`${a.data.titulo} ${a.data.descricao}`.toLowerCase()}>
+              <h3>{a.data.titulo}</h3>
+              <p>{a.data.descricao}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    ))}
+    <p class="contato">Não achou o que precisava? Escreva para <a href={`mailto:${empresa.email}`}>{empresa.email}</a>.</p>
+  </section>
+  <script>
+    const campo = document.getElementById('busca') as HTMLInputElement;
+    const semAcento = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    campo.addEventListener('input', () => {
+      const termo = semAcento(campo.value.trim());
+      let visiveis = 0;
+      document.querySelectorAll<HTMLElement>('.artigo').forEach((a) => {
+        const ok = semAcento(a.dataset.texto!).includes(termo);
+        a.hidden = !ok;
+        if (ok) visiveis++;
+      });
+      document.querySelectorAll<HTMLElement>('.grupo').forEach((g) => (g.hidden = !g.querySelector('.artigo:not([hidden])')));
+      document.getElementById('vazio')!.hidden = visiveis > 0;
+    });
+  </script>
+</Base>
+<style>
+  h1 { font-size: clamp(2rem, 4vw, 2.8rem); }
+  .busca { display: grid; gap: 8px; margin-top: 32px; max-width: 560px; font-weight: 600; }
+  .busca input { font: 500 1.05rem var(--fonte-texto); padding: 15px 16px; border-radius: var(--raio-p); border: 1.5px solid var(--borda); background: #fff; }
+  #vazio { margin-top: 20px; }
+  .grupo { margin-top: 48px; }
+  .grupo h2 { font-size: 1.4rem; margin-bottom: 16px; }
+  .artigos { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .artigo { background: #fff; border: 1.5px solid var(--borda); border-radius: var(--raio-m); padding: 22px; text-decoration: none; }
+  .artigo:hover { border-color: var(--marca); }
+  .artigo[hidden] { display: none; }
+  .artigo h3 { font-size: 1.1rem; margin-bottom: 6px; }
+  .artigo p { color: #3D4249; font-size: .97rem; }
+  .contato { margin-top: 56px; }
+  .contato a { color: var(--marca-escura); }
+</style>
