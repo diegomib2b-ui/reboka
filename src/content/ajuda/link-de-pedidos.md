@@ -14,7 +14,7 @@ O link de pedidos é uma página só sua, onde o cliente informa onde está e pe
 3. Informe o seu WhatsApp de atendimento. Ele aparece para o cliente depois do pedido.
 4. Toque em **Copiar link**.
 
-## O que o cliente preenche
+## O que o cliente preenche (3 passos)
 
 - Onde o veículo está. Ele pode tocar em **Usar minha localização** para enviar o ponto do celular, ou escrever o endereço.
 - Para onde levar, o tipo de serviço, nome, WhatsApp e veículo.
