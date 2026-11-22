@@ -32,18 +32,23 @@ const faq = [
   { p: 'Funciona no celular?', r: 'Sim. O painel abre no navegador do celular, do tablet e do computador, e pode ser instalado na tela inicial como um aplicativo.' },
 ];
 ---
-<Base titulo="Reboka | Sistema para guincho: chamados, cotação por km e Pix">
+<Base titulo="Reboka | Sistema de gestão para guincho e reboque">
 
   <section class="hero">
     <div class="container hero-grade">
       <div class="hero-texto">
-        <h1>Do chamado ao Pix,<br /><span class="hl2 realce">sem conta de cabeça</span></h1>
-        <p class="lead">O Reboka cota o guincho por km em segundos, despacha o motorista e cobra na entrega. Tudo no celular, com o caminhão na rua.</p>
+        <p class="hero-olho">Sistema de gestão para guincho e reboque</p>
+        <h1>O sistema que organiza o seu guincho,<br /><span class="hl2 realce">do chamado ao Pix</span></h1>
+        <p class="lead">Você assina, abre no celular e controla tudo em uma tela: chamados, cotação por km, motoristas e cobrança. Sem instalar nada.</p>
         <div class="hero-acoes">
           <a class="btn btn-primario" href="/cadastro/">Testar {TESTE_GRATIS_DIAS} dias grátis</a>
           <a class="btn btn-secundario" href="/app/?demo=1">Ver a demonstração</a>
         </div>
-        <p class="hero-nota">Sem cartão de crédito. Cancele quando quiser.</p>
+        <ul class="hero-fatos">
+          <li>Funciona no celular</li>
+          <li>Assinatura a partir de {brl(planos[0].precoMensal)} por mês</li>
+          <li>{TESTE_GRATIS_DIAS} dias grátis, sem cartão</li>
+        </ul>
       </div>
 
     </div>
@@ -57,8 +62,19 @@ const faq = [
 
   <section class="secao oque" id="o-que-e">
     <div class="container">
-      <h2>O guincho roda na rua. A gestão ainda roda no caderno.</h2>
-      <p class="lead">Preço calculado de cabeça, chamado anotado no WhatsApp, cobrança guardada na memória. O Reboka junta as três coisas em uma tela.</p>
+      <h2>O que é o Reboka</h2>
+      <p class="lead">É um sistema online, por assinatura mensal, feito para quem trabalha com guincho. Você usa no navegador do celular ou do computador para registrar cada chamado, calcular o preço, despachar o motorista e cobrar.</p>
+
+      <ul class="oque-lista">
+        <li><b>1. Registra o chamado</b>Cliente, veículo, onde está e para onde vai.</li>
+        <li><b>2. Calcula o preço</b>Saída + km + noturno + adicionais, pela sua tabela.</li>
+        <li><b>3. Despacha e avisa</b>Motorista definido e mensagem pronta no WhatsApp.</li>
+        <li><b>4. Cobra e controla</b>Pix na entrega e o que ficou a receber.</li>
+      </ul>
+
+      <p class="oque-nao"><b>O Reboka não é um aplicativo para pedir guincho.</b> O cliente continua chamando você pelo telefone ou pelo WhatsApp. O Reboka organiza tudo o que acontece depois.</p>
+
+      <h3 class="oque-sub">O guincho roda na rua. A gestão ainda roda no caderno.</h3>
 
       <div class="trio">
         <div><h3>A cotação</h3><p>sai de cabeça, <b>no meio do trânsito</b>.</p></div>
@@ -582,6 +598,20 @@ const faq = [
 <style>
   /* Reboka: foto de guincho cobrindo a hero inteira; o assunto fica à direita e o texto à esquerda. */
   .hero-texto h1 .realce { color: var(--marca); }
+  .hero-texto h1 { font-size: clamp(2rem, 3.5vw, 3rem); }
+  .hero-olho { display: inline-block; background: var(--marca); color: var(--grafite); font: 700 .78rem var(--fonte-texto); letter-spacing: .06em; text-transform: uppercase; padding: 6px 12px; margin-bottom: 18px; }
+  .hero-fatos { list-style: none; margin: 22px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; color: #E4E6EB; font-size: .92rem; font-weight: 500; }
+  .hero-fatos li { display: flex; align-items: center; gap: 8px; }
+  .hero-fatos li::before { content: ''; width: 8px; height: 8px; background: var(--marca); flex: 0 0 auto; }
+  .oque-lista { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .oque-lista li { background: #fff; border: 1px solid var(--borda); border-top: 3px solid var(--marca); box-shadow: var(--sombra-card); padding: 18px; color: var(--cinza); font-size: .96rem; line-height: 1.45; }
+  .oque-lista b { display: block; font: 600 1.08rem var(--fonte-titulo); color: var(--tinta); letter-spacing: -.01em; margin-bottom: 6px; }
+  .oque-nao { margin-top: 18px; background: var(--nevoa); border-left: 4px solid var(--grafite); padding: 16px 18px; color: var(--tinta); max-width: 78ch; }
+  .oque-sub { margin-top: clamp(40px, 6vw, 64px); font-size: clamp(1.4rem, 2.6vw, 1.9rem); }
+  @media (max-width: 820px) {
+    .hero-fatos { flex-direction: column; align-items: center; }
+    .oque-lista { grid-template-columns: 1fr 1fr; }
+  }
   @media (min-width: 821px) {
     .hero-foto img { width: 66%; margin-left: auto; object-position: 50% 64%; }
     .hero-foto::after { background:
