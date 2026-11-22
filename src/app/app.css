@@ -1457,3 +1457,33 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
 .tj-credito { margin: 4px 0 0; padding: 6px 12px; font-size: .72rem; color: var(--cinza); line-height: 1.35; }
 li.tj-credito { border-top: 1px solid var(--borda); }
 .tj-credito a { color: var(--cinza); }
+
+/* === Andamento do transporte (como o rastreio de uma entrega) === */
+.ch-trilha { display: grid; gap: 8px; margin-top: 4px; }
+.ch-trilha-texto { font: 600 .9rem var(--fonte-texto); color: #1F7A4D; }
+.ch-trilha-barra { position: relative; height: 6px; background: #E3E6EA; margin: 10px 12px 4px 0; }
+.ch-trilha-barra > i { position: absolute; left: 0; top: 0; bottom: 0; background: #1F9D5C;
+  background-image: repeating-linear-gradient(-45deg, rgba(255,255,255,.28) 0 6px, transparent 6px 12px); background-size: 17px 17px; animation: chTrilhaFaixa 1.2s linear infinite; }
+.ch-trilha-guincho { position: absolute; top: 50%; transform: translate(-50%, -58%); color: var(--grafite); background: #fff; border: 2px solid #1F9D5C; border-radius: 50%;
+  width: 34px; height: 34px; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(22, 24, 29, .18); animation: chTrilhaAnda 1.6s ease-in-out infinite; }
+.ch-trilha-etapas { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); font: 600 .74rem var(--fonte-texto); color: #9AA0A8; }
+.ch-trilha-etapas li:nth-child(2) { text-align: center; }
+.ch-trilha-etapas li:last-child { text-align: right; }
+.ch-trilha-etapas .feito { color: #1F7A4D; }
+.ch-trilha-etapas .atual { color: var(--grafite); }
+.ch-trilha-mini { gap: 2px; margin-top: 2px; }
+.ch-trilha-mini .ch-trilha-barra { height: 4px; margin: 16px 12px 12px 0; }
+.ch-trilha-mini .ch-trilha-guincho { width: 26px; height: 26px; border-width: 1.5px; }
+.ch-trilha-mini .ch-trilha-texto { font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@keyframes chTrilhaFaixa { to { background-position: 17px 0; } }
+@keyframes chTrilhaAnda { 0%, 100% { margin-left: -2px; } 50% { margin-left: 2px; } }
+
+/* O cartão "Agora" pulsa de leve: chama o olho para o que tem que ser feito primeiro. Vermelho quando o cliente está esperando demais. */
+.ch-agora { position: relative; }
+.ch-agora::after { content: ''; position: absolute; inset: -1px; pointer-events: none; animation: chPulso 2.4s ease-out infinite; }
+.ch-agora.ch-e-novo:has(.chip-vencido)::after { animation-name: chPulsoAlerta; animation-duration: 1.8s; }
+@keyframes chPulso { 0% { box-shadow: 0 0 0 0 rgba(255, 194, 26, .55); } 70%, 100% { box-shadow: 0 0 0 12px rgba(255, 194, 26, 0); } }
+@keyframes chPulsoAlerta { 0% { box-shadow: 0 0 0 0 rgba(194, 65, 12, .45); } 70%, 100% { box-shadow: 0 0 0 12px rgba(194, 65, 12, 0); } }
+@media (prefers-reduced-motion: reduce) {
+  .ch-agora::after, .ch-trilha-barra > i, .ch-trilha-guincho { animation: none; }
+}
