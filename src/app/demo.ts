@@ -115,6 +115,14 @@ const agendamentos: Agendamento[] = [
   ch('a5', 'Carlos Mendes', '41990000001', 'Hilux prata', 'DEF2E45', 'Socorro: bateria (chupeta)', 'Shopping Palladium, estacionamento G2', 'No local', 5, 120, 'entregue', min(140), { motorista: 'Arthur', pago: true }),
   ch('a6', 'Seguradora Aliança', '41990000040', 'HB20 branco', 'MNO5H01', 'Remoção de sinistro', 'Linha Verde com Av. Mal. Floriano', 'Pátio da seguradora, CIC', 22, 324, 'entregue', min(200), { motorista: 'Madie', pagador: 'Seguradora Aliança', noturno: true }),
   ch('a7', 'Bruno Alves', '41988880009', 'Strada vermelha', 'JKL4G89', 'Reboque de carro', 'R. João Bettega, 5000, CIC', 'Mecânica Dois Irmãos, Portão', 12, 204, 'confirmado', diaHora(1, 9)),
+  // Agendados espalhados pelos próximos dias, para a agenda ter o que mostrar.
+  ch('a8', 'Auto Center Silva', '41988880011', 'Corolla prata', 'PQR6I12', 'Reboque de carro', 'R. Waldemar Loureiro Campos, 900, Boqueirão', 'Auto Center Silva, Hauer', 7, 182, 'confirmado', diaHora(1, 11)),
+  ch('a9', 'Marina Prado', '41991112222', 'Gol prata', 'STU7J23', 'Reboque de carro', 'Av. Winston Churchill, 2000, Capão Raso', 'Oficina Central, Ponta Grossa', 110, 645, 'confirmado', diaHora(1, 14)),
+  ch('a10', 'Leilão Pátio Sul', '41990000050', 'Fiesta preto', null, 'Remoção de sinistro', 'Pátio Sul, Pinheirinho', 'Pátio do leilão, Araucária', 24, 258, 'confirmado', diaHora(2, 9), { pagador: 'Leilão Pátio Sul' }),
+  ch('a11', 'Seguradora Aliança', '41990000040', 'Onix preto', 'VWX8K34', 'Remoção de sinistro', 'R. Francisco Derosso, 1200, Xaxim', 'Oficina credenciada, Centro', 13, 209, 'confirmado', diaHora(4, 8), { pagador: 'Seguradora Aliança' }),
+  ch('a12', 'João Ferraz', '41992223333', 'CG 160 azul', null, 'Reboque de moto', 'Av. República Argentina, 3000, Portão', 'R. Izaac Ferreira da Cruz, Sítio Cercado', 9, 191, 'confirmado', diaHora(4, 16)),
+  ch('a13', 'Oficina do Beto', '41988880001', 'Saveiro branca', 'YZA9L45', 'Reboque de utilitário ou SUV', 'BR-116, km 115, Pinheirinho', 'Oficina do Beto, Pinheirinho', 6, 177, 'confirmado', diaHora(5, 10), { pagador: 'Oficina do Beto' }),
+  ch('a14', 'Camila Rocha', '41993334444', 'HR-V cinza', 'BCD0M56', 'Reboque de utilitário ou SUV', 'R. Itupava, 1500, Alto da XV', 'Concessionária, Batel', 8, 186, 'confirmado', diaHora(0, 17)),
 ];
 
 const retornos: Retorno[] = [
