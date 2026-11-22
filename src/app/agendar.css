@@ -9,23 +9,23 @@ body { background: var(--moldura); }
 .ag-bloco { margin-top: 26px; }
 .ag-bloco h2 { font: 600 .8rem var(--fonte-texto); text-transform: uppercase; letter-spacing: .06em; color: var(--cinza); margin-bottom: 12px; }
 .ag-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.ag-chips button { font: 500 .95rem var(--fonte-texto); color: #2C4A55; background: #fff; border: 1.5px solid var(--borda); border-radius: 0; padding: 10px 16px; cursor: pointer; }
-.ag-chips button.on { background: var(--nevoa); border-color: var(--marca); color: var(--grafite); font-weight: 600; }
+.ag-chips button { font: 500 .95rem var(--fonte-texto); color: var(--tinta); background: #fff; border: 1.5px solid var(--borda); border-radius: 0; padding: 10px 16px; cursor: pointer; }
+.ag-chips button.on { background: var(--marca); border-color: var(--grafite); color: var(--grafite); font-weight: 600; }
 .ag-dias { display: grid; grid-auto-flow: column; grid-auto-columns: 58px; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
 .ag-dias button { display: grid; justify-items: center; gap: 2px; padding: 10px 0; background: #fff; border: 1.5px solid var(--borda); border-radius: 0; cursor: pointer; }
 .ag-dias button small { font-size: .72rem; color: var(--cinza); text-transform: uppercase; }
 .ag-dias button b { font: 700 1.2rem var(--fonte-titulo); color: var(--tinta); }
 .ag-dias button.on { background: var(--marca); border-color: var(--marca); }
-.ag-dias button.on small { color: #DDF3FB; }
-.ag-dias button.on b { color: #fff; }
+.ag-dias button.on small { color: var(--grafite); }
+.ag-dias button.on b { color: var(--grafite); }
 .ag-horas { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
 .ag-horas button { font: 600 .95rem var(--fonte-texto); color: var(--grafite); background: #fff; border: 1.5px solid var(--borda); border-radius: 0; padding: 11px 0; cursor: pointer; }
 .ag-horas button:disabled { opacity: .35; cursor: not-allowed; text-decoration: line-through; }
-.ag-horas button.on { background: var(--marca); border-color: var(--marca); color: #fff; }
+.ag-horas button.on { background: var(--marca); border-color: var(--marca); color: var(--grafite); }
 .ag-campo { display: grid; gap: 6px; margin-bottom: 14px; font-weight: 600; font-size: .9rem; color: var(--tinta); }
 .ag-campo input { font: 500 1rem var(--fonte-texto); color: var(--tinta); padding: 13px 14px; border-radius: 0; border: 1.5px solid var(--borda); background: #fff; }
 .ag-campo input:focus-visible { outline: 3px solid var(--marca); outline-offset: 1px; border-color: var(--marca); }
-.ag-confirmar { width: 100%; margin-top: 8px; font: 600 1.05rem var(--fonte-texto); color: #fff; background: var(--marca); border: 0; border-radius: 0; padding: 15px; cursor: pointer; }
+.ag-confirmar { width: 100%; margin-top: 8px; font: 600 1.05rem var(--fonte-texto); color: var(--grafite); background: var(--marca); border: 0; border-radius: 0; padding: 15px; cursor: pointer; }
 .ag-confirmar:disabled { opacity: .6; }
 .ag-erro { color: var(--chip-vencido-texto); background: var(--chip-vencido-fundo); border-radius: 0; padding: 10px 14px; margin: 12px 0; font-size: .92rem; }
 .ag-rodape { text-align: center; color: var(--cinza); font-size: .85rem; padding: 18px; border-top: 1.5px solid var(--borda); }
@@ -45,3 +45,14 @@ body { background: var(--moldura); }
 .av-estrelas .on { color: #F5B800; }
 .av-texto { width: 100%; font: 500 1rem var(--fonte-texto); color: var(--tinta); padding: 13px 14px; border-radius: 0; border: 1.5px solid var(--borda); background: #fff; resize: vertical; line-height: 1.45; }
 .av-texto:focus-visible { outline: 3px solid var(--marca); outline-offset: 1px; border-color: var(--marca); }
+
+/* Pedir guincho (público) */
+.pd-local { width: 100%; font: 600 1rem var(--fonte-texto); color: #fff; background: var(--grafite); border: 0; padding: 15px; cursor: pointer; margin-bottom: 12px; }
+.pd-local.ok { background: var(--chip-ok-fundo); color: var(--chip-ok-texto); }
+.pd-local:disabled { opacity: .7; }
+.pd-nota { color: var(--cinza); font-size: .86rem; margin: -4px 0 12px; }
+.ag-confirmar + .pd-nota { margin: 12px 0 0; text-align: center; }
+.pd-dupla { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 10px; }
+.pd-dupla .ag-campo { min-width: 0; }
+.pd-dupla .ag-campo input { width: 100%; min-width: 0; box-sizing: border-box; }
+.pd-wpp { display: block; text-decoration: none; text-align: center; margin-top: 18px; box-sizing: border-box; }

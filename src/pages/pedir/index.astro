@@ -1,0 +1,24 @@
+---
+// Página pública "Pedir guincho". Montada no navegador (client:only) e lê ?g=<slug> do guincho.
+import '@fontsource/sora/700.css';
+import '@fontsource/figtree/400.css';
+import '@fontsource/figtree/500.css';
+import '@fontsource/figtree/600.css';
+import '../../styles/global.css';
+import '../../app/agendar.css';
+import Pedir from '../../app/Pedir';
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Pedir guincho | Reboka</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#F9FEFF" />
+  </head>
+  <body>
+    <Pedir client:only="react" />
+  </body>
+</html>

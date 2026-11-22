@@ -1274,3 +1274,10 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
   .ch-col h2 { display: none; }
   .ch-form { grid-template-columns: 1fr; gap: 14px; }
 }
+
+/* Link de pedidos (dentro de Chamados) */
+.ch-link { display: grid; gap: 14px; }
+.ch-link .ag-link { margin: 0; }
+.ch-link-acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+.ch-link-acoes .btn { flex: 1 1 auto; text-align: center; text-decoration: none; }
+.ch-link-dicas { margin: 0; padding-left: 18px; color: var(--cinza); font-size: .92rem; display: grid; gap: 4px; }

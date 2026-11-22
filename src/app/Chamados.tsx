@@ -28,6 +28,10 @@ const hojeLocal = (iso: string) => new Date(iso).toDateString() === new Date().t
 const rotaMaps = (origem: string, destino: string) =>
   `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origem)}&destination=${encodeURIComponent(destino)}&travelmode=driving`;
 const primeiro = (n: string) => n.trim().split(' ')[0];
+// Ponto de partida para o mapa: a posição do celular do cliente, quando ele enviou pelo link; senão, o endereço escrito.
+const partida = (a: Agendamento) => (a.origem_lat != null && a.origem_lng != null ? `${a.origem_lat},${a.origem_lng}` : a.origem || '');
+const pontoMaps = (a: Agendamento) => `https://www.google.com/maps/search/?api=1&query=${a.origem_lat},${a.origem_lng}`;
+const slugify = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
 
 export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao: boolean; aoMudar: () => void }) {
   const [lista, setLista] = useState<Agendamento[] | null>(null);
@@ -41,6 +45,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
   const [entregar, setEntregar] = useState<Agendamento | null>(null);
   const [pix, setPix] = useState<Agendamento | null>(null);
   const [tarifas, setTarifas] = useState(false);
+  const [linkAberto, setLinkAberto] = useState(false);
   const [, setTique] = useState(0);
 
   const carregar = () => api.agendamentos().then(setLista).catch((e) => setErro(e.message));
@@ -48,7 +53,8 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
     carregar();
     api.servicos().then(setServicos).catch(() => {});
     api.equipe(loja.id).then((e) => setMotoristas(e.map((p) => p.nome))).catch(() => {});
-    const t = setInterval(() => setTique((n) => n + 1), 60000); // atualiza o "há X min" dos cartões
+    // A cada minuto: atualiza o "há X min" dos cartões e busca pedidos novos que chegaram pelo link.
+    const t = setInterval(() => { setTique((n) => n + 1); carregar(); }, 60000);
     return () => clearInterval(t);
   }, []);
 
@@ -108,6 +114,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
         )}
         <footer>
           <span className="ch-tags">
+            {a.canal === 'link' && <span className="chip chip-ok">Pelo link</span>}
             {a.motorista && <span className="chip chip-neutro">{a.motorista}</span>}
             {a.pagador && <span className="chip chip-neutro">Paga: {a.pagador}</span>}
           </span>
@@ -125,6 +132,7 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
           <p>Do pedido à entrega: cote, despache e receba sem sair desta tela.</p>
         </div>
         <div className="ch-topo-acoes">
+          {gestao && <button type="button" className="btn btn-secundario" onClick={() => setLinkAberto(true)}>Link de pedidos</button>}
           {gestao && <button type="button" className="btn btn-secundario" onClick={() => setTarifas(true)}>Tabela de preço</button>}
           <button type="button" className="btn btn-primario ch-novo-desk" onClick={() => setNovo(true)}>Novo chamado</button>
         </div>
@@ -203,7 +211,8 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
                 <li><i className="ch-pt ch-pt-a" aria-hidden="true" />{sel.origem || 'Origem não informada'}</li>
                 <li><i className="ch-pt ch-pt-b" aria-hidden="true" />{sel.destino || 'Destino não informado'}{sel.km ? <em>{Number(sel.km)} km</em> : null}</li>
               </ol>
-              {sel.origem && sel.destino && <a className="link" href={rotaMaps(sel.origem, sel.destino)} target="_blank" rel="noopener">Abrir a rota no Google Maps</a>}
+              {sel.origem_lat != null && <a className="link" href={pontoMaps(sel)} target="_blank" rel="noopener">Ver no mapa onde o cliente está</a>}
+              {partida(sel) && sel.destino && <a className="link" href={rotaMaps(partida(sel), sel.destino)} target="_blank" rel="noopener">Abrir a rota no Google Maps</a>}
             </div>
             <div className="det-sec">
               <span className="det-rot">Cobrança</span>
@@ -222,6 +231,10 @@ export default function Chamados({ loja, gestao, aoMudar }: { loja: Loja; gestao
             </div>
           </div>
         )}
+      </Janela>
+
+      <Janela titulo="Link de pedidos" aberta={linkAberto} aoFechar={() => setLinkAberto(false)}>
+        {linkAberto && <LinkPedidos loja={loja} aoMudar={aoMudar} />}
       </Janela>
 
       <Janela titulo="Tabela de preço" aberta={tarifas} aoFechar={() => setTarifas(false)}>
@@ -346,6 +359,52 @@ function FormChamado({ loja, servicos, aoSalvar, aoCancelar }: { loja: Loja; ser
         </div>
       </aside>
     </form>
+  );
+}
+
+function LinkPedidos({ loja, aoMudar }: { loja: Loja; aoMudar: () => void }) {
+  const [tel, setTel] = useState(loja.pedir_telefone ?? '');
+  const [salvando, setSalvando] = useState(false);
+  const [copiado, setCopiado] = useState(false);
+  const [erro, setErro] = useState('');
+  const link = loja.slug ? `${location.origin}/pedir/?g=${loja.slug}` : '';
+  async function salvar(d: { pedir_ativo?: boolean; pedir_telefone?: string | null; slug?: string }) {
+    setSalvando(true); setErro('');
+    try { await api.salvarPedirConfig(loja.id, d); aoMudar(); } catch (e) { setErro((e as Error).message); } finally { setSalvando(false); }
+  }
+  // O endereço do link nasce do nome do guincho, com 4 letras sorteadas no fim para não repetir o de outra empresa.
+  const ligar = () => salvar({ pedir_ativo: true, slug: loja.slug || `${slugify(loja.nome)}-${Math.random().toString(36).slice(2, 6)}` });
+  const copiar = () => navigator.clipboard?.writeText(link).then(() => { setCopiado(true); setTimeout(() => setCopiado(false), 1800); }).catch(() => {});
+  return (
+    <div className="ch-link">
+      <p className="dica sem-topo">O cliente abre este link no celular, informa onde está e o pedido cai aqui em <b>Novos</b>. Você confere, cota e despacha.</p>
+      <label className="alterna-check">
+        <input type="checkbox" checked={loja.pedir_ativo} disabled={salvando} onChange={(e) => (e.target.checked ? ligar() : salvar({ pedir_ativo: false }))} />
+        <span>{loja.pedir_ativo ? 'Recebendo pedidos pelo link' : 'Link desligado'}</span>
+      </label>
+      {loja.pedir_ativo && link && (
+        <>
+          <div className="ag-link">
+            <input readOnly aria-label="Link de pedidos" value={link} onFocus={(e) => e.target.select()} />
+            <button type="button" className="btn btn-primario" onClick={copiar}>{copiado ? 'Copiado!' : 'Copiar link'}</button>
+          </div>
+          <div className="ch-link-acoes">
+            <a className="btn btn-secundario" href={link} target="_blank" rel="noopener">Ver como o cliente vê</a>
+            <a className="btn btn-wpp" href={`https://wa.me/?text=${encodeURIComponent(`Precisa de guincho? Peça por aqui: ${link}`)}`} target="_blank" rel="noopener">Enviar por WhatsApp</a>
+          </div>
+          <Campo rotulo="Seu WhatsApp de atendimento" dica="Aparece para o cliente depois que ele envia o pedido.">
+            <input type="tel" inputMode="tel" value={tel} onChange={(e) => setTel(e.target.value)} onBlur={() => tel.replace(/\D/g, '') !== (loja.pedir_telefone ?? '') && salvar({ pedir_telefone: tel.replace(/\D/g, '') || null })} placeholder="(41) 99999-0000" />
+          </Campo>
+          <span className="det-rot">Onde divulgar</span>
+          <ul className="ch-link-dicas">
+            <li>Na mensagem automática e na bio do WhatsApp Business.</li>
+            <li>No perfil do Google e no Instagram.</li>
+            <li>Em QR Code no caminhão e no cartão que fica nas oficinas parceiras.</li>
+          </ul>
+        </>
+      )}
+      {erro && <Aviso>{erro}</Aviso>}
+    </div>
   );
 }
 

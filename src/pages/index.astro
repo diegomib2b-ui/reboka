@@ -10,17 +10,19 @@ const passos = [
 
 const recursos = [
   { titulo: 'Cotação por km', texto: 'Sua tabela de preço em um lugar só: saída, valor por km, km incluídos, acréscimo noturno e adicionais como patins. O total aparece enquanto você digita.', largo: true },
+  { titulo: 'Link para o cliente pedir', texto: 'Cada guincho tem o seu link. O cliente abre no celular, envia a localização e o pedido cai direto nos seus chamados novos.' },
   { titulo: 'Quadro de chamados', texto: 'Novos, a caminho, carregados e entregues. Você bate o olho e sabe onde está cada veículo.' },
   { titulo: 'WhatsApp com mensagem pronta', texto: 'Cotação, guincho a caminho e entrega: um toque abre a conversa com o texto preenchido.' },
   { titulo: 'Pix na entrega', texto: 'QR Code e copia e cola com o valor do chamado, gerados com a sua chave. O dinheiro cai direto na sua conta, sem taxa de intermediário.', largo: true },
   { titulo: 'A receber por empresa', texto: 'Oficina, seguradora ou frota que paga depois fica marcada no chamado, com o total em aberto no topo da tela.' },
   { titulo: 'Motoristas e comissão', texto: 'Cada chamado com o motorista que atendeu. No fim do mês, o faturamento e a comissão de cada um já estão somados.' },
   { titulo: 'Clientes e parceiros', texto: 'Quem já chamou fica guardado com veículo, placa e histórico. Na próxima vez, o chamado abre mais rápido.', largo: true },
-  { titulo: 'Remoção agendada', texto: 'Transporte marcado para amanhã ou para a semana que vem fica separado, com data e hora, até virar chamado.' },
+  { titulo: 'Remoção agendada', texto: 'Transporte marcado para amanhã ou para a semana que vem fica separado, com data e hora, até virar chamado.', largo: true },
 ];
 
 const faq = [
   { p: 'Trabalho sozinho, com um caminhão. Serve para mim?', r: 'Serve, e foi pensado para isso. Você abre o chamado pelo celular em menos de um minuto e não precisa mais fazer conta de cabeça no meio do trânsito. O plano Essencial é para um usuário.' },
+  { p: 'O cliente consegue pedir o guincho sozinho?', r: 'Sim. Você liga o seu link de pedidos e divulga no WhatsApp, no Google ou em um QR Code no caminhão. O cliente informa onde está, pode enviar a localização do celular, e o pedido aparece nos seus chamados novos. Você responde com o valor antes de sair.' },
   { p: 'Como o Reboka sabe a distância?', r: 'Você informa os quilômetros. Com origem e destino preenchidos, um link abre a rota no Google Maps para você conferir a distância. O Reboka faz o resto da conta pela sua tabela de preço.' },
   { p: 'Posso mudar o valor que o sistema calculou?', r: 'Pode. A cotação é uma sugestão pela sua tabela. Você edita o valor final antes de abrir o chamado, por exemplo para dar um desconto ou cobrar uma dificuldade extra.' },
   { p: 'Atendo oficina e seguradora que pagam depois. Como fica?', r: 'No chamado você informa quem paga. Na entrega, marca que fica a receber. O total em aberto aparece no topo da tela de chamados até você marcar como recebido.' },
@@ -66,13 +68,13 @@ const faq = [
       <p class="lead">É um sistema online, por assinatura mensal, feito para quem trabalha com guincho. Você usa no navegador do celular ou do computador para registrar cada chamado, calcular o preço, despachar o motorista e cobrar.</p>
 
       <ul class="oque-lista">
-        <li><b>1. Registra o chamado</b>Cliente, veículo, onde está e para onde vai.</li>
+        <li><b>1. Registra o chamado</b>Você digita, ou o cliente pede pelo seu link com a localização.</li>
         <li><b>2. Calcula o preço</b>Saída + km + noturno + adicionais, pela sua tabela.</li>
         <li><b>3. Despacha e avisa</b>Motorista definido e mensagem pronta no WhatsApp.</li>
         <li><b>4. Cobra e controla</b>Pix na entrega e o que ficou a receber.</li>
       </ul>
 
-      <p class="oque-nao"><b>O Reboka não é um aplicativo para pedir guincho.</b> O cliente continua chamando você pelo telefone ou pelo WhatsApp. O Reboka organiza tudo o que acontece depois.</p>
+      <p class="oque-nao"><b>O Reboka não distribui chamados entre guincheiros.</b> O cliente chama você pelo telefone, pelo WhatsApp ou pelo seu link de pedidos, e o pedido chega só para você. O Reboka organiza tudo o que acontece depois.</p>
 
       <h3 class="oque-sub">O guincho roda na rua. A gestão ainda roda no caderno.</h3>
 
@@ -183,7 +185,7 @@ const faq = [
           <ul>
             <li>Emitir nota fiscal ou conhecimento de transporte.</li>
             <li>Rastrear o caminhão por GPS.</li>
-            <li>Receber chamados de plataformas de seguradora.</li>
+            <li>Receber chamados distribuídos por aplicativos ou seguradoras.</li>
           </ul>
         </div>
       </div>
