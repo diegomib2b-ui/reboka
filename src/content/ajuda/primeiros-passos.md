@@ -12,12 +12,16 @@ Em quatro passos a conta fica pronta para uso.
 3. **Revise os serviços.** O Reboka já traz reboque de carro, moto e utilitário, além de socorros com preço fechado. Ajuste os valores e apague o que não usa.
 4. **Abra o primeiro chamado.** Toque em **Novo chamado**, informe cliente, origem, destino e distância. O valor aparece na hora e você pode enviar a cotação pelo WhatsApp.
 
-## As fases do chamado
+## Como ler a tela de Chamados
 
-- **Novo:** o cliente pediu e ainda não saiu ninguém.
-- **A caminho:** você despachou um motorista.
-- **Carregado:** o veículo está em cima do caminhão.
-- **Entregue:** o serviço terminou. Aqui você recebe por Pix ou marca que fica a receber.
+A tela é uma fila, já na ordem em que você deve atender.
+
+- **Agora:** o chamado mais urgente, com um botão só, que é o próximo passo.
+- **Em seguida:** os demais, uma linha cada.
+- A ordem é: pedido novo sem resposta, pedido já cotado, remoção agendada que está chegando, veículo carregado e guincho a caminho.
+- Pedido novo sem resposta há mais de 10 minutos fica em vermelho.
+
+O botão muda conforme o chamado anda: **Cotar**, **Enviar cotação**, **Despachar**, **Carreguei** e **Entregar**.
 
 ## Dica
 

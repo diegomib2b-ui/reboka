@@ -27,6 +27,7 @@ const loja: Loja = {
   pix_chave: '41999990000', pix_nome: 'Guincho Pinheirinho', pix_cidade: 'Curitiba',
   wa_ativo: true, wa_instancia: 'demo', wa_numero: '41999990000', wa_persona: null, wa_proativo_retorno: true, wa_proativo_pronto: true,
   perfil: 'oficina', vagas_funilaria: 1, carros_por_horario: 3,
+  pedir_ativo: true, pedir_telefone: '41999990000',
   tarifa_saida: 150, tarifa_km: 4.5, tarifa_franquia_km: 0, tarifa_noturno_pct: 30,
   tarifa_adicionais: [{ nome: 'Patins', valor: 80 }, { nome: 'Veículo rebaixado', valor: 60 }, { nome: 'Retirada de garagem', valor: 100 }, { nome: 'Hora parada', valor: 70 }],
 };
@@ -107,8 +108,8 @@ const ch = (id: string, nome: string, telefone: string, veiculo: string, placa: 
   id, nome, telefone, veiculo, placa, servico_nome, origem, destino, km, valor, status, inicio, criado_em: inicio, previsao_entrega: null, vaga: null,
   noturno: false, adicionais: [], motorista: null, pagador: null, pago: false, observacao: null, ...x });
 const agendamentos: Agendamento[] = [
-  ch('a1', 'Thaís Guedes', '41990000020', 'Onix branco', 'RTY7A21', 'Reboque de carro', 'Av. das Torres, 1200, Uberaba', 'Auto Center Silva, Boqueirão', 14, 213, 'fila', min(4)),
-  ch('a2', 'Rafael Cordeiro', '41990000021', 'CG 160 vermelha', null, 'Reboque de moto', 'R. Izaac Ferreira da Cruz, Sítio Cercado', 'Residência, Xaxim', 6, 177, 'fila', min(11), { observacao: 'Pneu traseiro furado' }),
+  ch('a1', 'Thaís Guedes', '41990000020', 'Onix branco', 'RTY7A21', 'Reboque de carro', 'Av. das Torres, 1200, Uberaba', 'Auto Center Silva, Boqueirão', 14, 213, 'fila', min(4), { cotacao_enviada_em: min(2) }),
+  ch('a2', 'Rafael Cordeiro', '41990000021', 'CG 160 vermelha', null, 'Reboque de moto', 'R. Izaac Ferreira da Cruz, Sítio Cercado', 'Residência, Xaxim', 0, 0, 'fila', min(11), { observacao: 'Pneu traseiro furado', canal: 'link', origem_lat: -25.5402, origem_lng: -49.2655, tem_foto: true }),
   ch('a3', 'Patrícia Souza', '41990000003', 'Compass branco', 'ABC1D23', 'Reboque de utilitário ou SUV', 'BR-277, km 78, sentido litoral', 'Concessionária Jeep, Rebouças', 31, 370, 'em_servico', min(26), { motorista: 'Arthur', adicionais: [{ nome: 'Patins', valor: 80 }] }),
   ch('a4', 'Oficina do Beto', '41988880001', 'Civic cinza', 'GHI3F67', 'Reboque de carro', 'R. Francisco Derosso, 3400, Xaxim', 'Oficina do Beto, Pinheirinho', 9, 191, 'pronto', min(48), { motorista: 'Madie', pagador: 'Oficina do Beto' }),
   ch('a5', 'Carlos Mendes', '41990000001', 'Hilux prata', 'DEF2E45', 'Socorro: bateria (chupeta)', 'Shopping Palladium, estacionamento G2', 'No local', 5, 120, 'entregue', min(140), { motorista: 'Arthur', pago: true }),
@@ -222,6 +223,8 @@ export function ativarDemo() {
     atualizarChamado: async (id: string, x: Partial<Agendamento>) => { const a = agendamentos.find((y) => y.id === id); if (a) Object.assign(a, x); },
     entregarChamado: async (_l: string, a: Agendamento, _s: Servico[], pago: boolean) => { const x = agendamentos.find((y) => y.id === a.id); if (x) { x.status = 'entregue'; x.pago = pago; } },
     chamadosAReceber: async () => agendamentos.filter((a) => a.status === 'entregue' && !a.pago),
+    fotoChamado: async () => '/img/demo-foto-pedido.webp',
+    salvarPedirConfig: async (_id: string, x: Partial<Loja>) => { Object.assign(loja, x); },
     salvarTarifas: async (_id: string, x: Partial<Loja>) => { Object.assign(loja, x); },
     criarAgendamento: async (_l: string, x: Partial<Agendamento> & { nome: string; inicio: string; status: Agendamento['status'] }) => {
       const id = 'novo' + Date.now();

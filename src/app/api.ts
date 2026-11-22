@@ -14,6 +14,8 @@ export type Loja = { id: string; nome: string; documento: string | null; plano: 
   wa_ativo: boolean; wa_instancia: string | null; wa_numero: string | null; wa_persona: string | null; wa_proativo_retorno: boolean; wa_proativo_pronto: boolean;
   perfil: 'oficina' | 'funilaria' | 'misto'; vagas_funilaria: number; carros_por_horario: number;
   /** Tabela de preço do guincho: a cotação do chamado sai destes números. */
+  /** Link público "Pedir guincho": ligado ou não, e o WhatsApp que o cliente vê depois de pedir. */
+  pedir_ativo: boolean; pedir_telefone: string | null;
   tarifa_saida: number; tarifa_km: number; tarifa_franquia_km: number; tarifa_noturno_pct: number; tarifa_adicionais: Adicional[] };
 export type Adicional = { nome: string; valor: number };
 export type Membro = { loja_id: string; usuario_id: string; papel: Papel; nome: string; reboka_lojas: Loja };
@@ -100,7 +102,11 @@ export type Agendamento = {
   /** Campos do chamado de guincho (migration 0024). */
   origem: string | null; destino: string | null; km: number | null; valor: number | null; noturno: boolean;
   adicionais: Adicional[]; motorista: string | null; placa: string | null; pagador: string | null; pago: boolean; observacao: string | null;
+  /** 'link' quando o cliente pediu pelo link público; com a posição do celular, se ele enviou. */
+  canal?: string | null; origem_lat?: number | null; origem_lng?: number | null; tem_foto?: boolean; cotacao_enviada_em?: string | null;
 };
+export type PedirInfo = { nome: string; telefone: string | null; servicos: string[] };
+export type Pedido = { nome: string; telefone: string; veiculo: string; placa: string; servico: string; origem: string; destino: string; observacao: string; lat: number | null; lng: number | null };
 /** Fases do chamado na tela. No banco são os status do motor: fila, em_servico, pronto e entregue (confirmado = agendado). */
 export type NovoChamado = { nome: string; telefone: string | null; veiculo: string | null; placa: string | null; servico_nome: string | null;
   origem: string | null; destino: string | null; km: number | null; valor: number | null; noturno: boolean; adicionais: Adicional[];
@@ -513,7 +519,7 @@ export const api = {
   async criarChamado(lojaId: string, d: NovoChamado) {
     return ok(await sb.from('reboka_agendamentos').insert({ loja_id: lojaId, ...d, telefone: d.telefone ? d.telefone.replace(/\D/g, '') : null }).select('id'));
   },
-  async atualizarChamado(id: string, d: Partial<Pick<Agendamento, 'motorista' | 'valor' | 'km' | 'pago' | 'pagador' | 'observacao' | 'destino' | 'origem'>>) {
+  async atualizarChamado(id: string, d: Partial<Pick<Agendamento, 'motorista' | 'valor' | 'km' | 'pago' | 'pagador' | 'observacao' | 'destino' | 'origem' | 'noturno' | 'adicionais' | 'cotacao_enviada_em'>>) {
     ok(await sb.from('reboka_agendamentos').update(d).eq('id', id).select('id'));
   },
   /** Entregar o chamado: marca entregue e lança o valor cobrado no financeiro (acha ou cria o cliente pelo telefone). */
@@ -536,6 +542,31 @@ export const api = {
   /** Chamados entregues que ainda não foram pagos (oficina, seguradora ou cliente que paga depois). */
   async chamadosAReceber(): Promise<Agendamento[]> {
     return ok(await sb.from('reboka_agendamentos').select('*').eq('status', 'entregue').eq('pago', false).order('inicio')) as Agendamento[];
+  },
+  // ----- link público "Pedir guincho" -----
+  async pedirInfo(slug: string): Promise<PedirInfo | null> {
+    const l = ok(await sb.rpc('reboka_pedir_info', { p_slug: slug })) as PedirInfo[];
+    return l[0] ?? null;
+  },
+  async pedir(slug: string, d: Pedido) {
+    return ok(await sb.rpc('reboka_pedir', { p_slug: slug, p_nome: d.nome, p_telefone: d.telefone, p_veiculo: d.veiculo, p_placa: d.placa, p_servico: d.servico,
+      p_origem: d.origem, p_destino: d.destino, p_observacao: d.observacao, p_lat: d.lat, p_lng: d.lng })) as string;
+  },
+  /** Envia a foto do veículo de um pedido recém-criado (arquivo <id>.jpg no Storage) e marca o chamado. */
+  async enviarFotoPedido(id: string, foto: Blob) {
+    const r = await sb.storage.from('reboka-pedidos').upload(`${id}.jpg`, foto, { contentType: 'image/jpeg', upsert: false });
+    if (r.error) throw new Error('Não foi possível enviar a foto.');
+    ok(await sb.rpc('reboka_pedir_foto', { p_id: id }));
+  },
+  /** Endereço temporário (10 minutos) da foto do chamado. Só a equipe do guincho consegue gerar. */
+  async fotoChamado(id: string): Promise<string | null> {
+    const r = await sb.storage.from('reboka-pedidos').createSignedUrl(`${id}.jpg`, 600);
+    return r.data?.signedUrl ?? null;
+  },
+  async salvarPedirConfig(lojaId: string, d: { pedir_ativo?: boolean; pedir_telefone?: string | null; slug?: string }) {
+    const r = await sb.from('reboka_lojas').update(d).eq('id', lojaId).select('id');
+    if (r.error?.message.includes('duplicate')) throw new Error('Esse link já está em uso. Tente de novo.');
+    ok(r);
   },
   async salvarTarifas(lojaId: string, d: Pick<Loja, 'tarifa_saida' | 'tarifa_km' | 'tarifa_franquia_km' | 'tarifa_noturno_pct' | 'tarifa_adicionais'>) {
     ok(await sb.from('reboka_lojas').update(d).eq('id', lojaId).select('id'));
