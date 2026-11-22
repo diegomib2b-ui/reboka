@@ -578,12 +578,14 @@ export const api = {
   /** Mapa: endereço digitado vira ponto. Devolve null quando o mapa não está configurado (a tela volta ao km digitado). */
   async buscarEndereco(q: string, perto?: Ponto | null): Promise<Lugar[] | null> {
     const p = perto ? `&lat=${perto.lat}&lng=${perto.lng}` : '';
-    const r = await mapaServidor<{ enderecos: Lugar[] }>(`/api/mapa/endereco?q=${encodeURIComponent(q)}${p}`);
+    const r = await mapaServidor<{ enderecos: Lugar[]; fonte?: string }>(`/api/mapa/endereco?q=${encodeURIComponent(q)}${p}`);
+    if (r?.fonte) fonteMapa = r.fonte;
     return r && r.enderecos;
   },
   /** Mapa: km e minutos de cada trecho entre 2 a 4 pontos, na ordem. Null quando o mapa não está configurado. */
   async calcularRota(pontos: Ponto[]): Promise<{ km: number; min: number }[] | null> {
-    const r = await mapaServidor<{ trechos: { km: number; min: number }[] }>('/api/mapa/rota', { pontos });
+    const r = await mapaServidor<{ trechos: { km: number; min: number }[]; fonte?: string }>('/api/mapa/rota', { pontos });
+    if (r?.fonte) fonteMapa = r.fonte;
     return r && r.trechos;
   },
   async salvarTarifas(lojaId: string, d: Pick<Loja, 'tarifa_saida' | 'tarifa_km' | 'tarifa_franquia_km' | 'tarifa_noturno_pct' | 'tarifa_adicionais' | 'base_endereco' | 'base_lat' | 'base_lng' | 'tarifa_km_desloc' | 'tarifa_km_retorno'>) {
@@ -653,6 +655,8 @@ export function acessoLiberado(c: Loja): boolean {
   return !!c.acesso_ate && new Date(c.acesso_ate).getTime() > Date.now();
 }
 
+/** Qual mapa respondeu por último ('google' ou 'ors'): o OpenRouteService exige mostrar o crédito na tela. */
+export let fonteMapa: string | null = null;
 export type Ponto = { lat: number; lng: number };
 export type Lugar = Ponto & { texto: string };
 async function mapaServidor<T>(caminho: string, corpo?: unknown): Promise<T | null> {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { api, type Loja, type Lugar, type Ponto } from './api';
+import { api, fonteMapa, type Loja, type Lugar, type Ponto } from './api';
 import { Icone } from './icones';
 
 /**
@@ -97,6 +97,7 @@ export function CampoEndereco({ rotulo, valor, aoMudar, placeholder, perto, extr
           {sugestoes.map((s, i) => (
             <li key={i}><button type="button" onClick={() => { digitou.current = false; setSugestoes([]); aoMudar({ texto: s.texto, lat: s.lat, lng: s.lng }); }}>{s.texto}</button></li>
           ))}
+          {fonteMapa === 'ors' && sugestoes.length > 0 && <li className="tj-credito"><CreditoMapa /></li>}
         </ul>
       )}
     </div>
@@ -209,6 +210,12 @@ export default function Trajeto({ loja, valor, aoMudar, foco }: { loja: Loja; va
           : estado === 'erro' ? aviso
           : aviso || 'Escolha os endereços nas sugestões para calcular a rota sozinho, ou digite os km.'}
       </p>
+      {estado === 'ok' && fonteMapa === 'ors' && <p className="tj-credito"><CreditoMapa /></p>}
     </div>
   );
+}
+
+/** Crédito exigido pelo OpenRouteService no plano grátis. */
+export function CreditoMapa() {
+  return <>Rota: © <a href="https://openrouteservice.org/" target="_blank" rel="noopener">openrouteservice.org</a> by HeiGIT · Dados do mapa © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">colaboradores do OpenStreetMap</a></>;
 }

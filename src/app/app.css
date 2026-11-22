@@ -1454,3 +1454,6 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
 .tj-status { margin: 8px 0 0; font-size: .86rem; color: var(--cinza); line-height: 1.35; }
 .tj-erro { color: var(--perigo, #B42318); }
 .ch-form .tj { margin-bottom: 14px; }
+.tj-credito { margin: 4px 0 0; padding: 6px 12px; font-size: .72rem; color: var(--cinza); line-height: 1.35; }
+li.tj-credito { border-top: 1px solid var(--borda); }
+.tj-credito a { color: var(--cinza); }

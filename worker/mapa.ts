@@ -84,7 +84,7 @@ export async function buscarEndereco(env: EnvMapa, url: URL): Promise<Response> 
   const qual = env.GOOGLE_MAPS_KEY ? 'g' : 'o';
   const enderecos = await comCache(`e:${qual}:${q.toLowerCase()}:${perto ? `${perto.lat},${perto.lng}` : ''}`, 60 * 60 * 24 * 30,
     () => (env.GOOGLE_MAPS_KEY ? googleEndereco(env.GOOGLE_MAPS_KEY, q, perto) : orsEndereco(env.ORS_KEY!, q, perto)));
-  return json({ enderecos });
+  return json({ enderecos, fonte: qual === 'g' ? 'google' : 'ors' });
 }
 
 /** POST /api/mapa/rota { pontos: [{lat,lng}, ...] } (2 a 4 pontos) → km e minutos de cada trecho, na ordem. */
@@ -97,5 +97,5 @@ export async function calcularRota(env: EnvMapa, req: Request): Promise<Response
   const qual = env.GOOGLE_MAPS_KEY ? 'g' : 'o';
   const trechos = await comCache(`r:${qual}:${pts.map((p) => `${p.lat},${p.lng}`).join(';')}`, 60 * 60 * 24,
     () => (env.GOOGLE_MAPS_KEY ? googleRota(env.GOOGLE_MAPS_KEY, pts) : orsRota(env.ORS_KEY!, pts)));
-  return json({ trechos });
+  return json({ trechos, fonte: qual === 'g' ? 'google' : 'ors' });
 }
