@@ -46,22 +46,11 @@ const faq = [
         <p class="hero-nota">Sem cartão de crédito. Cancele quando quiser.</p>
       </div>
 
-      <div class="hero-mock" aria-hidden="true">
-        <div class="mock-topo"><span>Novo</span><b>há 4 min</b></div>
-        <div class="mock-nome">Thaís Guedes</div>
-        <div class="mock-veic">Onix branco · RTY7A21 · Reboque de carro</div>
-        <ol class="mock-rota">
-          <li><i class="pa"></i>Av. das Torres, 1200, Uberaba</li>
-          <li><i class="pb"></i>Auto Center Silva, Boqueirão<em>14 km</em></li>
-        </ol>
-        <dl class="mock-conta">
-          <dt>Saída</dt><dd>R$ 150</dd>
-          <dt>14 km × R$ 4,50</dt><dd>R$ 63</dd>
-        </dl>
-        <div class="mock-total"><span>Valor do chamado</span><b>R$ 213</b></div>
-        <div class="mock-btn">Despachar</div>
-      </div>
     </div>
+
+    <figure class="hero-foto">
+      <img src="/img/hero-guincho.webp" width="1600" height="1067" fetchpriority="high" alt="Caminhão guincho plataforma laranja levando um carro antigo por uma avenida" />
+    </figure>
   </section>
 
   <div class="emenda" aria-hidden="true"></div>
@@ -591,34 +580,21 @@ const faq = [
 </style>
 
 <style>
-  /* Reboka: cartão de chamado na hero, no lugar da foto. */
-  .hero-grade { flex-direction: row; align-items: center; justify-content: space-between; gap: 40px; }
-  .hero-texto { max-width: 600px; }
+  /* Reboka: foto de guincho cobrindo a hero inteira; o assunto fica à direita e o texto à esquerda. */
   .hero-texto h1 .realce { color: var(--marca); }
-  .hero-mock { flex: 0 0 340px; background: #fff; color: var(--tinta); border-top: 4px solid var(--marca); padding: 20px; box-shadow: 0 40px 70px -30px rgba(0,0,0,.8); display: grid; gap: 9px; rotate: 1.5deg; }
-  .mock-topo { display: flex; justify-content: space-between; align-items: center; font: 600 .8rem var(--fonte-texto); color: var(--cinza); }
-  .mock-topo span { background: var(--marca); color: var(--grafite); padding: 3px 10px; font-weight: 700; }
-  .mock-nome { font: 600 1.25rem var(--fonte-titulo); letter-spacing: -.02em; }
-  .mock-veic { font-size: .86rem; color: var(--cinza); }
-  .mock-rota { list-style: none; margin: 4px 0; padding: 0; display: grid; gap: 7px; }
-  .mock-rota li { display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; font-size: .92rem; align-items: center; }
-  .mock-rota em { font: 600 .78rem var(--fonte-texto); color: var(--cinza); font-style: normal; }
-  .mock-rota i { width: 10px; height: 10px; border: 2.5px solid var(--grafite); border-radius: 50%; display: block; }
-  .mock-rota i.pb { border-radius: 0; background: var(--marca); }
-  .mock-conta { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin: 4px 0 0; font-size: .88rem; color: var(--cinza); border-top: 1px solid var(--borda); padding-top: 10px; }
-  .mock-conta dd { margin: 0; color: var(--tinta); font-weight: 600; }
-  .mock-total { display: flex; justify-content: space-between; align-items: baseline; }
-  .mock-total span { font: 600 .7rem var(--fonte-texto); letter-spacing: .06em; text-transform: uppercase; color: var(--cinza); }
-  .mock-total b { font: 700 1.9rem var(--fonte-titulo); letter-spacing: -.03em; }
-  .mock-btn { background: var(--marca); color: var(--grafite); font: 700 1rem var(--fonte-texto); text-align: center; padding: 12px; margin-top: 4px; }
+  @media (min-width: 821px) {
+    .hero-foto img { width: 66%; margin-left: auto; object-position: 50% 64%; }
+    .hero-foto::after { background:
+      linear-gradient(90deg, #0E0F12 0%, #0E0F12 34%, rgba(14, 15, 18, .78) 46%, rgba(14, 15, 18, .12) 72%, rgba(14, 15, 18, .2) 100%),
+      linear-gradient(180deg, rgba(14, 15, 18, .35) 0%, rgba(14, 15, 18, 0) 22%, rgba(14, 15, 18, 0) 74%, #23262E 100%); }
+    .hero-texto { max-width: min(560px, 46%); }
+  }
   .para-quem.sem-foto { grid-template-columns: 1fr 1fr; }
   .planos.planos-dois { grid-template-columns: repeat(2, minmax(0, 380px)); justify-content: center; }
   .sim .sim-marcar { display: flex; flex-direction: row; align-items: center; gap: 10px; grid-column: 1 / -1; }
   .sim .sim-marcar input { width: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--marca); }
   .sim-balao { background: #DCF8C6; color: #14161A; padding: 12px 14px; border-radius: 12px 12px 12px 2px; font-size: .98rem; line-height: 1.4; margin: 6px 0 14px; text-align: left; }
   @media (max-width: 900px) {
-    .hero-grade { flex-direction: column; }
-    .hero-mock { flex: none; width: min(340px, 100%); rotate: 0deg; text-align: left; }
     .para-quem.sem-foto, .planos.planos-dois { grid-template-columns: 1fr; }
   }
 </style>
