@@ -1,3 +1,4 @@
+import { Icone } from './icones';
 import { useEffect, useState, type FormEvent } from 'react';
 import { api, type Pessoa, type Convite, type Registro, type Papel, type Loja } from './api';
 import { Janela, Campo, Aviso } from './ui';
@@ -48,7 +49,7 @@ export default function Equipe({ loja, euId }: { loja: Loja; euId: string }) {
           <h1>Equipe</h1>
           <p>Quem acessa o Reboka da {loja.nome} e o que cada função pode fazer.</p>
         </div>
-        {planoLoja && <button type="button" className="btn btn-primario" onClick={() => setConvidando(true)}>Convidar pessoa</button>}
+        {planoLoja && <button type="button" className="btn btn-primario" onClick={() => setConvidando(true)} title="Convidar pessoa"><Icone nome="convidar" tamanho={22} /><span>Convidar pessoa</span></button>}
       </header>
       {erro && <Aviso>{erro}</Aviso>}
       {!planoLoja && <Aviso tipo="info">O plano Essencial tem 1 usuário. Equipe, permissões e registro de alterações fazem parte do plano Equipe. <a href="#/conta">Ver planos na conta</a></Aviso>}

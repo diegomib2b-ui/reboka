@@ -1,3 +1,4 @@
+import { Icone } from './icones';
 import { useEffect, useState, type FormEvent } from 'react';
 import { api, type Servico } from './api';
 import { Janela, Campo, Aviso } from './ui';
@@ -21,7 +22,7 @@ export default function Servicos({ lojaId }: { lojaId: string }) {
           <h1>Serviços</h1>
           <p>Os tipos de reboque e de socorro que você atende. O reboque é cotado pela Tabela de preço (saída + km), em Chamados. O socorro usa o preço fechado daqui.</p>
         </div>
-        <button type="button" className="btn btn-primario" onClick={() => setEditando('novo')}>Novo serviço</button>
+        <button type="button" className="btn btn-primario" onClick={() => setEditando('novo')} title="Novo serviço"><Icone nome="somar" tamanho={22} /><span>Novo serviço</span></button>
       </header>
 
       <ul className="lista-procs">

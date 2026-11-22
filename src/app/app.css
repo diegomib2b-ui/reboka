@@ -340,17 +340,15 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
   .graficos { grid-template-columns: 1fr; }
 }
 @media (max-width: 860px) {
-  .casca { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto 1fr; padding-bottom: 96px; }
+  .casca { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto 1fr; padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
   /* No mobile o topo (logo reboka + loja) sai: navegação fica na barra de baixo
      e a identidade/conta já aparece na aba "Mais". Mais espaço pro conteúdo. */
   .lateral { display: none; }
   .conteudo { padding: 8px 8px 8px; }
   .folha { padding: 20px 16px; border-radius: var(--raio-m); }
-  /* Barra de navegação flutuante (pílula) — destacada das bordas, com sombra. */
-  /* Nav pill clara flutuante; aba ativa com acento aqua da nova identidade. */
-  .abas { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 12px; right: 12px;
-    bottom: calc(10px + env(safe-area-inset-bottom)); background: #fff; border-radius: 0;
-    box-shadow: var(--sombra-flutua), 0 0 0 1px var(--borda); padding: 8px 6px; z-index: 5; }
+  /* Barra de navegação fixa no rodapé, de borda a borda (não flutua mais). */
+  .abas { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0;
+    background: #fff; border-top: 1px solid var(--borda); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); z-index: 5; }
   .abas a { display: grid; justify-items: center; gap: 3px; padding: 8px 2px; text-decoration: none; font-weight: 600; font-size: .74rem; color: var(--cinza); border-radius: 0; }
   .abas a[aria-current="page"] { color: var(--marca-escura); background: var(--nevoa); }
   .abas a[aria-current="page"] .icone { color: var(--marca-escura); }
@@ -1084,7 +1082,7 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
   background: var(--grafite); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .02em;
   box-shadow: var(--sombra-flutua); pointer-events: none; display: inline-flex; align-items: center; gap: 7px; }
 .demo-selo::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--farol); box-shadow: 0 0 0 3px color-mix(in srgb, var(--farol) 35%, transparent); }
-@media (max-width: 720px) { .demo-selo { bottom: 76px; left: 14px; right: auto; } }
+@media (max-width: 860px) { .demo-selo { bottom: calc(76px + env(safe-area-inset-bottom)); left: 12px; right: auto; } }
 
 /* ===== Financeiro (dashboard de ganhos, Opção A — cards brancos) ===== */
 .fin-painel { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 8px; }
@@ -1313,31 +1311,37 @@ code { background: var(--nevoa); border-radius: 0; padding: 1px 6px; font-size: 
 .ch-foto { display: block; }
 .ch-foto img { width: 100%; max-height: 260px; object-fit: cover; display: block; border: 1px solid var(--borda); }
 
-/* === Topo do celular na cor do aplicativo ===
-   A barra fica fixa no alto, em âmbar. O cabeçalho de cada tela (título grande) continua a mesma cor logo abaixo dela;
-   ao rolar, o título grande some por baixo da barra e o nome da tela aparece nela, menor. Vale para todas as telas do painel. */
+/* === Topo do celular: barra compacta na cor do aplicativo ===
+   Uma barra só, fixa no alto: o nome da tela à esquerda e as ações da tela à direita, em ícone.
+   O cabeçalho grande de cada tela (título, descrição e botões com texto) fica só no computador. Vale para todas as telas. */
+.cabeca .btn > .icone { display: none; }
+.ficha-resumo-m { display: none; }
 @media (max-width: 860px) {
-  .topo-m { display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; z-index: 6;
-    box-sizing: border-box; height: calc(46px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 16px 0; background: var(--marca);
-    transition: box-shadow .18s ease; }
-  .topo-m span { font: 600 1.02rem var(--fonte-titulo); letter-spacing: -.01em; color: var(--grafite); opacity: 0; transform: translateY(8px); transition: opacity .18s ease, transform .18s ease;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .topo-m.rolou span { opacity: 1; transform: none; }
-  .topo-m.rolou { box-shadow: 0 1px 0 rgba(22, 24, 29, .14), 0 8px 18px -12px rgba(22, 24, 29, .45); }
-  .casca { padding-top: calc(46px + env(safe-area-inset-top)); }
+  .topo-m { display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 6;
+    box-sizing: border-box; height: calc(52px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 150px 0 16px; background: var(--marca);
+    box-shadow: 0 1px 0 rgba(22, 24, 29, .14); }
+  .topo-m span { font: 700 1.18rem var(--fonte-titulo); letter-spacing: -.01em; color: var(--grafite); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .casca { padding-top: calc(52px + env(safe-area-inset-top)); }
   .conteudo { padding-top: 0; }
   .folha { padding-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; }
-  .folha > :first-child { margin-top: 20px; }
-  .folha > .cabeca:first-child, .folha > .mais:first-child > .mais-titulo:first-child {
-    margin: 0 -24px 18px; padding: 4px 24px 18px; background: var(--marca); max-width: none; }
-  .folha > .mais:first-child { margin-top: 0; }
-  .folha > .cabeca:first-child h1, .folha > .mais:first-child > .mais-titulo:first-child { color: var(--grafite); }
-  .folha > .cabeca:first-child p { color: #3B3520; }
-  .folha > .cabeca:first-child p b { color: var(--grafite); }
-  /* Sobre o âmbar, o botão principal troca para grafite; os secundários já são brancos. */
-  .folha > .cabeca:first-child .btn-primario { background: var(--grafite); color: #fff; }
-  .folha > .cabeca:first-child .btn-secundario { border-color: transparent; }
-  .folha > .cabeca:first-child a:not(.btn) { color: var(--grafite); }
+  .folha > :first-child, .folha > .cabeca:first-child + * { margin-top: 16px; }
+  .folha > .mais:first-child > .mais-titulo:first-child { display: none; }
+  /* O cabeçalho da tela vira só o grupo de ícones, encaixado à direita da barra. */
+  .folha > .cabeca { position: fixed; top: env(safe-area-inset-top); right: 6px; z-index: 6; height: 52px; margin: 0; padding: 0;
+    display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 2px; width: auto; max-width: none; background: none; }
+  .folha > .cabeca h1, .folha > .cabeca p, .folha > .cabeca .ficha-carro, .folha > .cabeca .obs { display: none; }
+  .folha > .cabeca > div { display: flex; align-items: center; gap: 2px; width: auto; margin: 0; }
+  .folha > .cabeca .btn { display: inline-grid; place-items: center; flex: 0 0 auto; width: 44px; height: 44px; min-height: 0; padding: 0;
+    background: none; border: 0; box-shadow: none; color: var(--grafite); border-radius: 0; }
+  .folha > .cabeca .btn:active { background: rgba(22, 24, 29, .12); }
+  .folha > .cabeca .btn:disabled { opacity: .35; }
+  .folha > .cabeca .btn > .icone { display: block; }
+  .folha > .cabeca .btn > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .folha > .cabeca .ch-novo-desk { display: none; }
+  .ficha-resumo-m { display: grid; gap: 4px; margin-bottom: 18px; }
+  .ficha-resumo-m h2 { font-size: 1.5rem; }
+  .ficha-resumo-m p { color: var(--cinza); margin: 0; }
+  .ficha-resumo-m .obs { color: var(--tinta); background: var(--nevoa); padding: 10px 14px; margin-top: 8px; }
   .faixa { background: var(--marca-hover); color: var(--grafite); }
   .faixa a { color: var(--grafite); }
   .demo-selo { top: auto; }
